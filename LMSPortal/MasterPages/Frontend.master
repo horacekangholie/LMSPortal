@@ -1,0 +1,244 @@
+﻿<%@ Master Language="VB" AutoEventWireup="false" CodeFile="Frontend.master.vb" Inherits="MasterPages_Frontend" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- StyleSheet -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="../Content/style.css" rel="stylesheet" />
+
+    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
+
+    <!--Script for Loading Spinner-->
+    <script>
+        function showSpinner() {
+            /*console.log('Navigating away from the page.');*/
+            document.getElementById('loader-overlay').style.display = 'block';
+            document.getElementById('loader').style.display = 'block';
+        }
+
+        //window.onload = function () {
+        //    /*console.log('Page fully loaded.');*/
+        //    document.getElementById('loader-overlay').style.display = 'none';
+        //    document.getElementById('loader').style.display = 'none';
+        //    window.addEventListener('beforeunload', showSpinner);
+        //};
+
+        window.addEventListener('pageshow', function (event) {
+            /*console.log('Page shown or restored.');*/
+            document.getElementById('loader-overlay').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        });
+        window.addEventListener('beforeunload', showSpinner);
+
+
+    </script>
+
+    <!-- Style for Loading Spinner -->
+    <style>
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(0, 0, 0, 0.1); /* Semi-transparent gray overlay */
+            z-index: 9998; /* Set a high z-index to ensure the overlay is behind the spinner */
+            display: none; /* Hide the overlay by default */
+        }
+
+        .loader {
+            border: 10px solid rgba(0, 0, 0, 0.1);
+            border-top: 10px solid #007bff;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 2s linear infinite;
+            display: none; /* Hide the spinner by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-top: -30px;
+            margin-left: -30px;
+            z-index: 9999; /* Set a high z-index to ensure the spinner stays on top */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <style>
+        #sidebar {
+            margin-left: -270px;
+        }
+        /*#content {
+            transition: margin-left 0.5s;
+            margin-left: 0;*/ /* Initially, content is not shifted */
+            /*max-height: calc(100vh - 50px); 
+            overflow-y: auto;
+            -ms-overflow-style: none;*/ /* IE and Edge */
+            /*scrollbar-width: none;*/ /* Firefox */
+        /*}
+        #content::-webkit-scrollbar {
+            width: 0px;*/ /* Remove scrollbar space */
+            /*background: transparent;*/ /* Optional: just make scrollbar invisible */
+        /*}*/
+    </style>
+
+    <style>
+        #sidebarmenulist {
+            max-height: calc(100vh - 50px); 
+            overflow-y: auto;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        #sidebarmenulist::-webkit-scrollbar {
+            width: 0px; /* Remove scrollbar space */
+            background: transparent; /* Optional: just make scrollbar invisible */
+        }
+    </style>
+
+    <style>
+        .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+            border-top: 0.3em solid; /* Down arrow */
+            border-right: 0.3em solid transparent;
+            border-bottom: 0; /* This is necessary for the down arrow */
+            border-left: 0.3em solid transparent;
+        }
+
+        .dropdown-toggle.active::after {
+            border-top: 0; /* Remove the top border for the up arrow */
+            border-right: 0.3em solid transparent;
+            border-bottom: 0.3em solid; /* Up arrow */
+            border-left: 0.3em solid transparent;
+        }
+
+        .dropdown-toggle:empty::after {
+            margin-left: 0;
+        }
+    </style>
+
+    <style>
+        .logout-icon {
+            font-size: 15px;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="loader-overlay" class="loader-overlay"></div>
+    <div id="loader" class="loader"></div>
+
+    <form id="form1" runat="server">
+        <!-- Section - Header -->
+        <div class="wrapper d-flex align-items-stretch" style="display: flex">
+            <nav id="sidebar" style="position: fixed; top: 0; z-index: 999; height: 100vh; transition: all 0.5s" class="default">
+                <!-- Toggle Button -->
+                <div class="custom-menu">
+                    <button type="button" id="sidebarCollapse" class="btn btn-primary" onclick="sideBarToggle()">
+                        <i class="fa fa-bars"></i>
+                        <span class="sr-only">Toggle Menu</span>
+                    </button>
+                </div>
+
+                <!-- Section - Side Menu -->
+                <div id="sidebarmenulist" class="p-4">
+                    <!-- Logo -->
+                    <div class="sidebarComponent">
+                        <h1><a href="../Default.aspx" class="logo"><i class="bi bi-house-fill" style="padding-right: 8px"></i>LMSPortal </a></h1>
+                    </div>
+
+                    <!-- Login User -->
+                    <div class="sidebarComponent">
+                        <div class="UserProfile">
+                            <asp:Literal ID="UserIcon" runat="server"></asp:Literal>
+                            <asp:Label ID="LoggedInUser" runat="server" CssClass="displayuser"></asp:Label>
+                        </div>
+                    </div>
+
+                    <!-- Side Menu Links -->
+                    <div class="sidebarComponent">
+                        <asp:PlaceHolder ID="SideMenu" runat="server"></asp:PlaceHolder>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Section - Page Content -->
+            <section id="content" class="p-4 p-md-5 pt-5" style="transition: all 0.5s; margin-left: 0px">
+                <div class="form-group form-inline" style="position:relative;float:right;padding-top:18px">
+                    <asp:LinkButton ID="LB_Logout" runat="server" CssClass="btn btn-default logout-icon" Text="<i class='bx bx-log-out right' style='padding-right:8px'></i>Log out"></asp:LinkButton>
+                </div>
+                <asp:ContentPlaceHolder ID="PageContent" runat="server"></asp:ContentPlaceHolder>
+            </section>
+        </div>
+    </form>
+
+    <script src="../Scripts/jquery.min.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/main.js"></script>
+    <script src="../Scripts/popper.js"></script>
+
+    <!-- Module collapse and expand effect -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var dropdown = document.getElementsByClassName("dropdown-toggle");
+
+            for (let i = 0; i < dropdown.length; i++) {
+                dropdown[i].addEventListener("click", function () {
+
+                    // Close other active dropdowns
+                    var activeDropdowns = document.querySelectorAll(".dropdown-toggle.active");
+                    for (let btn of activeDropdowns) {
+                        if (btn !== this) {
+                            btn.classList.remove("active");
+                            var cont = btn.nextElementSibling;
+                            cont.style.display = "none";
+                        }
+                    }
+
+                    // Toggle the active class and display of the current dropdown
+                    this.classList.toggle("active");
+                    var dropdownContent = this.nextElementSibling;
+                    dropdownContent.style.display = dropdownContent.style.display === "block" ? "none" : "block";
+                });
+            }
+        });
+    </script>
+
+
+    <!-- For side menu stay on page while scrolling -->
+    <script>
+        function sideBarToggle() {
+            var sidebar = document.getElementById("sidebar");
+            var content = document.getElementById("content");
+            if (content.style.marginLeft === "0px") {
+                sidebar.style.marginLeft = "0px";
+                content.style.marginLeft = "270px"; // Shift content to the right
+
+            } else {
+                sidebar.style.marginLeft = "-270px";
+                content.style.marginLeft = "0px"; // Shift content back to left
+            }
+        }
+    </script>
+
+</body>
+</html>

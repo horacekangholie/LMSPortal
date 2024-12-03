@@ -1,0 +1,205 @@
+﻿
+/* Report table style*/
+.Default {
+    cursor: default;
+}
+
+.table-primary {
+    border-bottom: 2px solid #85c1e9;
+}
+
+.table-active {
+    background-color: #fdfefe;
+    border-top: 2px solid #bfbfbf;
+    border-bottom: 4px double #bfbfbf;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Tab panel head on default page */
+.nav-tabs > li.active > a {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background-color: #b8daff;
+}
+
+.nav-tabs > li.active > a.active {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background-color: #b8daff;
+}
+
+
+/* GridView Page Style */
+.pagination-ys {
+    /*display: inline-block;*/
+    padding-left: 0;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+    .pagination-ys table {
+        border: none !important;
+    }
+
+        .pagination-ys table > tbody > tr > td {
+            border: none !important;
+            display: inline;
+        }
+
+        .pagination-ys table > tbody > tr > td > a,
+        .pagination-ys table > tbody > tr > td > span {
+            position: relative;
+            float: left;
+            padding: 8px 12px;
+            line-height: 1.42857143;
+            text-decoration: none;
+            color: #007BFF;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            margin-left: -1px;
+        }
+
+        .pagination-ys table > tbody > tr > td > span {
+            position: relative;
+            float: left;
+            padding: 8px 12px;
+            line-height: 1.42857143;
+            text-decoration: none;
+            margin-left: -1px;
+            z-index: 2;
+            color: #ffffff;
+            background-color: #007BFF;
+            border-color: #007BFF;
+            cursor: default;
+        }
+
+        .pagination-ys table > tbody > tr > td:first-child > a,
+        .pagination-ys table > tbody > tr > td:first-child > span {
+            margin-left: 0;
+            border-bottom-left-radius: 4px;
+            border-top-left-radius: 4px;
+        }
+
+        .pagination-ys table > tbody > tr > td:last-child > a,
+        .pagination-ys table > tbody > tr > td:last-child > span {
+            border-bottom-right-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+/* CSS based on ID */
+#PageContent_BT_Search, #PageContent_BT_Search_Token {
+    border-radius: 0px 5px 5px 0px;
+}
+
+#PageContent_TB_Search, #PageContent_TB_Search_Token {
+    border-radius: 5px 0px 0px 5px;
+}
+
+#PageContent_FormView1_TB_Address {
+    display: block;
+    width: 100%;
+    height: 125px !important;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize:none;
+}
+
+    *:focus {
+        outline: none !important;
+        border: 1px solid #66AFE9;
+    }
+
+    *:disabled {
+        outline: none !important;
+        background-color: #EEEEEE;
+    }
+
+#PageContent_TB_Notes {
+    display: block;
+    width: 100%;
+    height: 150px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+}
+
+#PageContent_TB_Description, #PageContent_TB_Sql_Strings {
+    display: block;
+    width: 100%;
+    height: 100px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+}
+
+.GridList {
+    display: block;
+    table-layout: fixed;
+    height: 240px;
+    width: 760px;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    overflow: auto;
+}
+
+#PageContent_FileUpload1 {
+    display: block;
+    width: 100%;
+    height: 40px !important;
+    padding: 3px 3px !important;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    cursor: pointer;
+}
+
+    #PageContent_FileUpload1::file-selector-button {
+        padding: 1.40rem 1.8rem !important;
+        margin: -0.750rem -0.4rem !important;
+        -webkit-margin-end: 0.75rem;
+        -moz-margin-end: 0.75rem;
+        margin-inline-end: 1.75rem !important;
+        color: #777;
+        background-color: #eee;
+        pointer-events: none;
+        border-color: inherit;
+        border-style: solid;
+        border-width: 0;
+        border-inline-end-width: 1px;
+        border-radius: 0;
+    }
+
+        #PageContent_FileUpload1::file-selector-button:hover {
+            /*background-color: #E2E2E2;*/
+            background-color: #000;
+        }
+
+
+
+
+
+

@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# For ASP.NET project
+bin/
+obj/
+*.user
+*.suo
+*.log
+.vs/
+*.dbmdl
+*.dbproj.schemaview
+TestResults/
+*.pfx
+*.publishsettings
+node_modules/

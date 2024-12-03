@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "LMSPortal", "LMSPortal\", "{D7E1B1B9-C9CD-4686-80F8-4DD5FDCD3A90}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.7.2"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_63825"
+		Debug.AspNetCompiler.PhysicalPath = "LMSPortal\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63825\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_63825"
+		Release.AspNetCompiler.PhysicalPath = "LMSPortal\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63825\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "63825"
+		SlnRelativePath = "LMSPortal\"
+		DefaultWebSiteLanguage = "Visual Basic"
+	EndProjectSection
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmailNotifications", "..\EmailNotifications\EmailNotifications\EmailNotifications.vbproj", "{905B2270-6FBC-4E14-B8C9-30DABF6827F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7E1B1B9-C9CD-4686-80F8-4DD5FDCD3A90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7E1B1B9-C9CD-4686-80F8-4DD5FDCD3A90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7E1B1B9-C9CD-4686-80F8-4DD5FDCD3A90}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7E1B1B9-C9CD-4686-80F8-4DD5FDCD3A90}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{905B2270-6FBC-4E14-B8C9-30DABF6827F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{905B2270-6FBC-4E14-B8C9-30DABF6827F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{905B2270-6FBC-4E14-B8C9-30DABF6827F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{905B2270-6FBC-4E14-B8C9-30DABF6827F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF6639D3-28DD-4A8D-95ED-AC98E5A25658}
+	EndGlobalSection
+EndGlobal
