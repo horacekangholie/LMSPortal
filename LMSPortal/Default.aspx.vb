@@ -20,8 +20,8 @@ Partial Class _Default
         If Session("User_Roles") IsNot Nothing Then
             Select Case Session("User_Roles")
                 Case "Admin"
-                    'BindGridView()
-                    'BindGridView1()
+                    BindGridView()
+                    BindGridView1()
                     ReminderDashboard.Visible = (Session("User_Name") = "Administrator")
                     AdminDashboard.Visible = True
                     CommonDashboard.Visible = True
