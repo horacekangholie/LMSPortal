@@ -1,6 +1,11 @@
 ﻿Imports System.IO
 Imports System.Data
 Imports System.Data.SqlClient
+Imports System.Web.UI.WebControls
+Imports NPOI.OpenXmlFormats.Spreadsheet
+Imports NPOI.HSSF.Record
+Imports System.Drawing
+'Imports NPOI.SS.Formula.Functions
 
 Partial Class Form_Module_Licence_Form
     Inherits LMSPortalBaseCode
@@ -163,7 +168,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColName(i), "_", " ")
+                    Bfield.HeaderText = ColName(i).Replace("_", " ")
                     If Bfield.HeaderText.Contains("Date") Then
                         Bfield.DataFormatString = "{0:dd MMM yy}"
                     End If
@@ -199,7 +204,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColName(i), "_", " ")
+                    Bfield.HeaderText = ColName(i).Replace("_", " ")
                     Bfield.HeaderStyle.Width = ColSize(i)
                     If Bfield.HeaderText.Contains("Date") Then
                         Bfield.DataFormatString = "{0:dd MMM yy}"
@@ -228,7 +233,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColData(i), "_", " ")
+                    Bfield.HeaderText = ColData(i).Replace("_", " ")
                     Bfield.HeaderStyle.Width = ColSize(i)
                     If Bfield.HeaderText.Contains("Balance") Or Bfield.HeaderText.Contains("Used") Then
 
@@ -251,7 +256,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColData(i), "_", " ")
+                    Bfield.HeaderText = ColData(i).Replace("_", " ")
                     Bfield.HeaderStyle.Width = ColSize(i)
                     If Bfield.HeaderText.Contains("Date") Then
                         Bfield.DataFormatString = "{0:yyyy-MM-dd}"
@@ -280,7 +285,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColData(i), "_", " ")
+                    Bfield.HeaderText = ColData(i).Replace("_", " ")
                     Bfield.HeaderStyle.Width = ColSize(i)
                     If Bfield.HeaderText.Contains("Date") Then
                         Bfield.DataFormatString = "{0:yyyy-MM-dd}"
@@ -318,7 +323,7 @@ Partial Class Form_Module_Licence_Form
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
                     Bfield.DataField = ColData(i)
-                    Bfield.HeaderText = Replace(ColData(i), "_", " ")
+                    Bfield.HeaderText = ColData(i).Replace("_", " ")
                     Bfield.ItemStyle.Width = ColSize(i)   '' when GridViewObj.ShowHeader is false then use itemstyle to set width
                     If Bfield.HeaderText.Contains("Date") Then
                         Bfield.DataFormatString = "{0:dd MMM yy}"
@@ -426,13 +431,16 @@ Partial Class Form_Module_Licence_Form
             '' Edit Button (to add module license quantity)
             Dim EditctrlCellIndex As Integer = e.Row.Cells.Count - 1
             Dim EditLinkButton As LinkButton = TryCast(e.Row.Cells(EditctrlCellIndex).Controls(0), LinkButton)
-            EditLinkButton.CommandArgument = drv("UID")
-            'EditLinkButton.Text = "<i class='bi bi-pencil-fill'></i>"    ' Pending enhancement
-            'EditLinkButton.CssClass = "btn btn-xs btn-info"
-            EditLinkButton.Text = "<i class='bi bi-lock'></i>"
-            EditLinkButton.CssClass = "btn btn-xs btn-light disabled"
-            EditLinkButton.Enabled = True
-            AddHandler EditLinkButton.Click, AddressOf Update_Module_Licence_Order_Click
+            If DateDiff(DateInterval.Day, CDate(drv("Created Date")), Date.Now) <= 365 Then
+                EditLinkButton.Text = "<i class='bi bi-pencil-fill'></i>"
+                EditLinkButton.CssClass = "btn btn-xs btn-info"
+            Else
+                EditLinkButton.Text = "<i class='bi bi-lock'></i>"
+                EditLinkButton.CssClass = "btn btn-xs btn-light disabled"
+            End If
+            EditLinkButton.CommandArgument = e.Row.RowIndex & "|" & drv("UID")
+            EditLinkButton.CausesValidation = False
+            AddHandler EditLinkButton.Click, AddressOf Edit_ModuleLicenceCount_Click
 
         End If
     End Sub
@@ -790,37 +798,125 @@ Partial Class Form_Module_Licence_Form
         Dim UploadedRecordCount As Integer = GridView_Order_List.Rows.Count
 
         If UploadedRecordCount > 0 Then
-            Try
-                Dim sqlStr As String = " EXEC SP_CRUD_LMS_Module_Licence N'" & EscapeChar(PO_No.Text) &
-                                                                      "', '" & PO_Date.Text &
-                                                                      "', '" & Chargeable.SelectedValue &
-                                                                      "', '" & EscapeChar(Remarks.Text) &
-                                                                      "', '" & Customer_ID &
-                                                                      "', '" & Sales_Representative_ID.SelectedValue & "' "
+            '' Check database if PO No exists
+            Dim RecordExists As Boolean = IIf(CInt(Get_Value("SELECT COUNT(*) AS NoOfRecords FROM LMS_Module_Licence_Order WHERE Customer_ID = N'" & Customer_ID & "' AND PO_No = N'" & PO_No.Text.Trim() & "'", "NoOfRecords")) > 0, True, False)
+            If RecordExists Then
+                AlertMessageMsgBox("PO No. " & PO_No.Text & " exists, please check the record")
+            Else
+                Try
+                    Dim sqlStr As String = " EXEC SP_CRUD_LMS_Module_Licence N'" & EscapeChar(PO_No.Text) &
+                                                                          "', '" & PO_Date.Text &
+                                                                          "', '" & Chargeable.SelectedValue &
+                                                                          "', '" & EscapeChar(Remarks.Text) &
+                                                                          "', '" & Customer_ID &
+                                                                          "', '" & Sales_Representative_ID.SelectedValue & "' "
 
-                RunSQL(sqlStr)
-            Catch ex As Exception
-                Response.Write("Error: " & ex.Message)
-            End Try
+                    RunSQL(sqlStr)
+                Catch ex As Exception
+                    Response.Write("Error: " & ex.Message)
+                End Try
+            End If
         Else
             licenceorderlistboxerrormsg.Visible = True
             popupModuleLicenceOrder.Show()
         End If
 
         DeleteStaging()
-        PopulateFormViewData()
+        'PopulateFormViewData()
         PopulateGridViewData()
     End Sub
 
 
-    Protected Sub Update_Module_Licence_Order_Click(ByVal sender As Object, ByVal e As EventArgs)
-        Dim UID As String = CType(sender, LinkButton).CommandArgument
-        'MsgBox(UID)
-        'popupModuleLicenceOrder.Show()           ' Pending enhancement
+
+
+    Protected Sub DDL_Module_Licence_Type_Load(sender As Object, e As EventArgs) Handles DDL_Module_Licence_Type.Load
+        If Not IsPostBack Then
+            Try
+                Dim sqlStr As String = "SELECT Value_3 AS Module_Type FROM DB_Lookup WHERE Value_4 = 'SM Module Licence' AND Value_3 IN ('AI', 'BYOC', 'e.Sense') ORDER BY Value_3 "
+
+                DDL_Module_Licence_Type.DataSource = GetDataTable(sqlStr)
+                DDL_Module_Licence_Type.DataTextField = "Module_Type"
+                DDL_Module_Licence_Type.DataValueField = "Module_Type"
+                DDL_Module_Licence_Type.DataBind()
+            Catch ex As Exception
+                Response.Write("Error: " & ex.Message)
+            End Try
+        End If
+    End Sub
+
+    Protected Sub DDL_Module_Licence_Type_SelectedIndexChanged(sender As Object, e As EventArgs) Handles DDL_Module_Licence_Type.SelectedIndexChanged
+        Dim Module_Licence_Type As DropDownList = pnlUpdateModuleLicenceCount.FindControl("DDL_Module_Licence_Type")
+        Dim Module_Licence_Quantity As TextBox = pnlUpdateModuleLicenceCount.FindControl("TB_Module_Licence_Quantity")
+
+        '' get the quantity from db and put to put to tb_quantity
+        TB_Selected_Quantity_By_Module_Type.Text = Get_Value("SELECT Quantity FROM LMS_Module_Licence_Order_Item WHERE UID = '" & TB_Selected_UID.Text & "' AND Module_Type = '" & Module_Licence_Type.SelectedValue & "'", "Quantity")
+        Module_Licence_Quantity.Text = TB_Selected_Quantity_By_Module_Type.Text
+
+        licenceorderquantityerrormsg.Visible = False
+
+        popupUpdateModuleLicenceCount.Show()
+    End Sub
+
+    Protected Sub Edit_ModuleLicenceCount_Click(ByVal sender As Object, ByVal e As EventArgs)
+        ModalHeaderModuleLicenceCount.Text = "Update Module Licence Order"
+        btnSaveModuleLicenceCount.Text = "Update"
+        btnCancelModuleLicenceCount.Text = "Cancel"
+
+        '' Reinitialize the field
+        DDL_Module_Licence_Type.SelectedIndex = -1
+        TB_Module_Licence_Quantity.Text = String.Empty
+        licenceorderquantityerrormsg.Visible = False
+
+        ' Get row command argument, get the value and pass them to hidden fields
+        Dim EditLinkButton As LinkButton = TryCast(sender, LinkButton)
+        Dim EditLinkButtonCommandArgument As Array = Split(EditLinkButton.CommandArgument, "|")
+        Dim HiddenFields As Array = {TB_Selected_Row_Index, TB_Selected_UID}
+
+        ' Loop through to assign value to hidden fields
+        For i = 0 To EditLinkButtonCommandArgument.Length - 1
+            HiddenFields(i).Text = EditLinkButtonCommandArgument(i)
+        Next
+
+        popupUpdateModuleLicenceCount.Show()
+    End Sub
+
+    Protected Sub Update_ModuleLicenceCount_Click(sender As Object, e As EventArgs) Handles btnSaveModuleLicenceCount.Click
+        Dim Selected_Row_Index As TextBox = pnlUpdateModuleLicenceCount.FindControl("TB_Selected_Row_Index")
+        Dim Selected_Selected_UID As TextBox = pnlUpdateModuleLicenceCount.FindControl("TB_Selected_UID")
+        Dim Module_Licence_Type As DropDownList = pnlUpdateModuleLicenceCount.FindControl("DDL_Module_Licence_Type")
+        Dim Module_Licence_Quantity As TextBox = pnlUpdateModuleLicenceCount.FindControl("TB_Module_Licence_Quantity")
+
+        Dim Quantity_By_Module_Type As String = IIf(Len(TB_Selected_Quantity_By_Module_Type.Text) > 0, TB_Selected_Quantity_By_Module_Type.Text, "0")
+
+        If CInt(Module_Licence_Quantity.Text) >= CInt(Quantity_By_Module_Type) Then
+            Try
+                Dim sqlStr As String = " EXEC SP_CRUD_LMS_Module_Licence_Order_Count N'" & Selected_Selected_UID.Text &
+                                                                                 "', N'" & Module_Licence_Type.SelectedValue &
+                                                                                 "', N'" & Module_Licence_Quantity.Text & "' "
+                RunSQL(sqlStr)
+            Catch ex As Exception
+                Response.Write("Error: " & ex.Message)
+            End Try
+        Else
+            AlertMessageMsgBox("Cannot be less than existing quantity")
+        End If
+
 
         'PopulateFormViewData()
-        'PopulateGridViewData()
+        PopulateGridViewData()
     End Sub
+
+    Protected Sub CustomValidator_TB_Module_Licence_Quantity_ServerValidate(source As Object, args As ServerValidateEventArgs)
+        Dim quantity As Integer
+        If Integer.TryParse(args.Value, quantity) Then
+            args.IsValid = (quantity <> 0)
+        Else
+            args.IsValid = False ' Fallback in case of non-integer input
+        End If
+        popupUpdateModuleLicenceCount.Show()
+        licenceorderquantityerrormsg.Visible = True
+    End Sub
+
 
 
 
@@ -1427,5 +1523,6 @@ Partial Class Form_Module_Licence_Form
     Protected Sub BT_Close_Click(ByVal sender As Object, ByVal e As EventArgs) Handles BT_Close.Click
         Response.Redirect("~/Form/Module_Licence.aspx")
     End Sub
+
 
 End Class

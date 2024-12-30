@@ -44,6 +44,10 @@
             $.blockUI.defaults.css = {};
         });
         $(document).ready(function () {
+            BlockUI("<%=pnlUpdateModuleLicenceCount.ClientID %>");
+            $.blockUI.defaults.css = {};
+        });
+        $(document).ready(function () {
             BlockUI("<%=pnlAddEditModuleLicence.ClientID %>");
             $.blockUI.defaults.css = {};
         });
@@ -330,6 +334,79 @@
                             PopupControlID="pnlAddEditModuleLicenceOrder" TargetControlID="lnkFakeModuleLicenceOrder"
                             BackgroundCssClass="modalBackground">
                         </cc1:ModalPopupExtender>
+
+                        <!-- Modal body - Update Module Licence Count -->
+                        <asp:Panel ID="pnlUpdateModuleLicenceCount" runat="server" CssClass="modalPopup">
+                            <h3 style="padding: 10px 0px 20px 20px">
+                                <asp:Label ID="ModalHeaderModuleLicenceCount" runat="server"></asp:Label></h3>
+                            <table border="0" class="modalPopupTable" style="width: 100%">
+                                <tr style="vertical-align: top">
+                                    <td style="width: 55%; padding: 0px 10px 0px 0px">
+                                        <label>Licence Type</label>
+                                        <asp:DropDownList ID="DDL_Module_Licence_Type" runat="server"  CssClass="form-control" AppendDataBoundItems="true" AutoPostBack="true">
+                                            <asp:ListItem Value="-1" Text=""></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:CompareValidator ID="CompareValidator_DDL_Module_Licence_Type" runat="server" ValidationGroup="ModuleLicenceCount"
+                                            ErrorMessage="Please select Licence Type" CssClass="invalid-feedback"
+                                            Display="Dynamic"
+                                            SetFocusOnError="true"
+                                            Operator="NotEqual" ValueToCompare="-1"
+                                            ControlToValidate="DDL_Module_Licence_Type" Type="String">
+                                        </asp:CompareValidator>
+                                    </td>
+                                    <td style="width: 45%; padding: 0px 10px 0px 0px">
+                                        <label>Quantity</label>
+                                        <asp:TextBox ID="TB_Module_Licence_Quantity" runat="server" CssClass="form-control"></asp:TextBox>
+                                        <asp:RequiredFieldValidator ID="RequiredField_TB_Module_Licence_Quantity" runat="server" ValidationGroup="ModuleLicenceCount"
+                                            ErrorMessage="This field cannot be blank" CssClass="invalid-feedback"
+                                            Display="Dynamic"
+                                            SetFocusOnError="True"
+                                            ControlToValidate="TB_Module_Licence_Quantity">
+                                        </asp:RequiredFieldValidator>
+                                        <asp:RegularExpressionValidator ID="RegEx_TB_Module_Licence_Quantity" runat="server" ValidationGroup="ModuleLicenceCount"
+                                            ErrorMessage="Only numeric integer allowed" CssClass="invalid-feedback"
+                                            Display="Dynamic"
+                                            SetFocusOnError="True"
+                                            ControlToValidate="TB_Module_Licence_Quantity"
+                                            ValidationExpression="^\d+$">
+                                        </asp:RegularExpressionValidator>
+                                        <asp:CustomValidator ID="CustomValidator_TB_Module_Licence_Quantity" runat="server" ValidationGroup="ModuleLicenceCount"
+                                            ErrorMessage="Quantity cannot be 0" CssClass="invalid-feedback"
+                                            Display="Dynamic"
+                                            SetFocusOnError="True"
+                                            ControlToValidate="TB_Module_Licence_Quantity"
+                                            OnServerValidate="CustomValidator_TB_Module_Licence_Quantity_ServerValidate">
+                                        </asp:CustomValidator>
+                                    </td>
+                                </tr>
+                                <tr id="licenceorderquantityerrormsg" runat="server" style="vertical-align: top" visible="false">
+                                    <td style="padding: 0px 0px 0px 0px"></td>
+                                    <td style="padding: 0px 0px 0px 0px">
+                                        <span style="font-size: 11px; color: #dc3545">Quantity cannot be zero</span>
+                                    </td>
+                                </tr>
+                                <tr style="vertical-align: bottom">
+                                    <td style="width: 800px; padding: 20px 10px 10px 0px" colspan="2">
+                                        <asp:Button ID="btnSaveModuleLicenceCount" runat="server" CssClass="btn btn-sm btn-default" CommandArgument="Add" ValidationGroup="ModuleLicenceCount" />
+                                        <asp:Button ID="btnCancelModuleLicenceCount" runat="server" CssClass="btn btn-sm btn-default" CausesValidation="false" OnClientClick="return Hidepopup()" />
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- hidden field -->
+                            <div>
+                                <asp:TextBox ID="TB_Selected_Row_Index" runat="server" CssClass="form-control" Visible="false"></asp:TextBox>
+                                <asp:TextBox ID="TB_Selected_UID" runat="server" CssClass="form-control" Visible="false"></asp:TextBox>
+                                <asp:TextBox ID="TB_Selected_Quantity_By_Module_Type" runat="server" CssClass="form-control" Visible="false"></asp:TextBox>
+                            </div>
+                        </asp:Panel>
+
+                        <asp:LinkButton ID="lnkFakeUpdateModuleLicenceCount" runat="server"></asp:LinkButton>
+                        <cc1:ModalPopupExtender ID="popupUpdateModuleLicenceCount" runat="server" DropShadow="false"
+                            PopupControlID="pnlUpdateModuleLicenceCount" TargetControlID="lnkFakeUpdateModuleLicenceCount"
+                            BackgroundCssClass="modalBackground">
+                        </cc1:ModalPopupExtender>
+
+
                     </ContentTemplate>
 
                     <Triggers>
