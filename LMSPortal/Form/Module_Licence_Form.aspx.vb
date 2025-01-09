@@ -800,7 +800,7 @@ Partial Class Form_Module_Licence_Form
         If UploadedRecordCount > 0 Then
             '' Check database if PO No exists
             Dim RecordExists As Boolean = IIf(CInt(Get_Value("SELECT COUNT(*) AS NoOfRecords FROM LMS_Module_Licence_Order WHERE Customer_ID = N'" & Customer_ID & "' AND PO_No = N'" & PO_No.Text.Trim() & "'", "NoOfRecords")) > 0, True, False)
-            If RecordExists Then
+            If RecordExists And PO_No.Text <> "NA" Then
                 AlertMessageMsgBox("PO No. " & PO_No.Text & " exists, please check the record")
             Else
                 Try

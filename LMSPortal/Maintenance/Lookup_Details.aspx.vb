@@ -100,12 +100,13 @@ Partial Class Maintenance_Lookup_Details
         Value_3 = TB_Value_3.Text
         Value_4 = TB_Value_4.Text
 
-        Dim plucode As String = Get_Value("SELECT ISNULL(Value_1, '') AS PLU_Code FROM DB_Lookup WHERE Value_1 = '" & Value_1 & "'", "PLU_Code")
+        Dim isValid As Boolean = IIf(Get_Value("SELECT COUNT(ISNULL(Value_1, '')) AS NoOfRecord FROM DB_Lookup WHERE Value_1 = '" & Value_1 & "' ", "NoOfRecord") < 1, True, False)
+        Dim toSkipValidate As Boolean = LookupNameToSkipValidate(Trim(TB_Lookup_Name.Text))
 
-        If Len(plucode) <= 0 Then
+        If isValid Or toSkipValidate Then
             Try
                 Dim sqlStr As String = " INSERT INTO DB_Lookup(Lookup_Name, Value_1, Value_2, Value_3, Value_4) " &
-                                   " VALUES('" & Lookup_Name & "', '" & Value_1 & "', '" & Value_2 & "', '" & Value_3 & "', '" & Value_4 & "')"
+                                       " VALUES('" & Lookup_Name & "', '" & Value_1 & "', '" & Value_2 & "', '" & Value_3 & "', '" & Value_4 & "')"
 
                 RunSQL(sqlStr)
             Catch ex As Exception
@@ -118,11 +119,20 @@ Partial Class Maintenance_Lookup_Details
             TB_Value_3.Text = String.Empty
             TB_Value_4.Text = String.Empty
         Else
-            AlertMessageMsgBox("PLU Code " & Value_1 & " exists.")
+            AlertMessageMsgBox(Value_1 & " exists, please check and try again.")
         End If
-
         PopulateGridViewData(TB_Search.Text)
     End Sub
+
+    Protected Function LookupNameToSkipValidate(ByVal lookupName As String) As Boolean
+        Select Case lookupName
+            Case "Bill Items"
+                Return False
+            Case Else
+                Return True
+        End Select
+    End Function
+
 
 
     '' Gridview controls
