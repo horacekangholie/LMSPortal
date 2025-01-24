@@ -256,13 +256,31 @@
                                 </td>
                                 <td style="width: 30%; padding: 0px 10px 20px 0px">
                                     <label>Application Type</label>
-                                    <asp:DropDownList ID="DDL_Application_Type" runat="server" CssClass="form-control" AutoPostBack="true"></asp:DropDownList>
+                                    <asp:DropDownList ID="DDL_Application_Type" runat="server" AppendDataBoundItems="true"  CssClass="form-control" AutoPostBack="true">
+                                        <asp:ListItem Text="" Value="-1"></asp:ListItem>
+                                    </asp:DropDownList>
+                                    <asp:CompareValidator ID="CompareValidator_DDL_Application_Type" runat="server" ValidationGroup="AppProductLicence"
+                                        ErrorMessage="Please select licence type" CssClass="invalid-feedback"
+                                        Display="Dynamic"
+                                        SetFocusOnError="true"
+                                        Operator="NotEqual" ValueToCompare="-1"
+                                        ControlToValidate="DDL_Application_Type" Type="String">
+                                    </asp:CompareValidator>
                                 </td>
                             </tr>
                             <tr style="vertical-align: top">
                                 <td style="width: 45%; padding: 0px 10px 20px 0px">
                                     <label>Requestor</label>
-                                    <asp:DropDownList ID="DDL_Sales_Representative" runat="server" CssClass="form-control"></asp:DropDownList>
+                                    <asp:DropDownList ID="DDL_Sales_Representative" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                                        <asp:ListItem Text="" Value="-1"></asp:ListItem>
+                                    </asp:DropDownList>
+                                    <asp:CompareValidator ID="CompareValidator_DDL_Sales_Representative" runat="server" ValidationGroup="AppProductLicence"
+                                        ErrorMessage="Please select requestor" CssClass="invalid-feedback"
+                                        Display="Dynamic"
+                                        SetFocusOnError="true"
+                                        Operator="NotEqual" ValueToCompare="-1"
+                                        ControlToValidate="DDL_Sales_Representative" Type="String">
+                                    </asp:CompareValidator>
                                 </td>
                                 <td style="width: 25%; padding: 0px 10px 20px 0px">
                                     <label>Chargeable</label>
@@ -293,6 +311,22 @@
                                 <td style="width: 55%; padding: 0px 10px 20px 0px" colspan="2">
                                     <label>Remarks</label>
                                     <asp:TextBox ID="TB_Remarks" runat="server" CssClass="form-control"></asp:TextBox>
+                                </td>
+                            </tr>
+                            <!-- AI Account No Selection -->
+                            <tr id="aiaccountno" runat="server" style="vertical-align: top">
+                                <td style="width: 100%; padding: 0px 10px 20px 0px" colspan="3">
+                                    <label>AI Account No</label>
+                                    <asp:DropDownList ID="DDL_AI_Account_No" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                                        <asp:ListItem Text="" Value="-1"></asp:ListItem>
+                                    </asp:DropDownList>
+                                    <asp:CompareValidator ID="CompareValidator_DDL_AI_Account_No" runat="server" ValidationGroup="AppProductLicence"
+                                        ErrorMessage="Please select AI Account" CssClass="invalid-feedback"
+                                        Display="Dynamic"
+                                        SetFocusOnError="true"
+                                        Operator="NotEqual" ValueToCompare="-1"
+                                        ControlToValidate="DDL_AI_Account_No" Type="String">
+                                    </asp:CompareValidator>
                                 </td>
                             </tr>
                             <tr style="vertical-align: bottom">

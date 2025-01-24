@@ -1190,7 +1190,8 @@ Partial Class Form_Module_Licence_Form
                                                               "', '" & Chargeable.SelectedValue &
                                                               "', '" & OS_Type.Text &
                                                               "', '" & Email.Text &
-                                                              "', N'" & EscapeChar(Remarks.Text) & "' "
+                                                              "', N'" & EscapeChar(Remarks.Text) &
+                                                              "', '0' "
                 RunSQL(sqlStr)
             Catch ex As Exception
                 Response.Write("Error: " & ex.Message)

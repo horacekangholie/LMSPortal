@@ -291,9 +291,9 @@ Partial Class Form_App_Product_Licence_Form
                 GridViewObj.AllowPaging = True
                 GridViewObj.PageSize = 10
                 GridViewObj.Columns.Clear()
-                Dim ColName() As String = {"Licence Code", "Token", "Created Date", "Activated Date", "Expired Date", "Status"}
-                Dim ColData() As String = {"Licence Code", "Token", "Created Date", "Activated Date", "Expired Date", "Status"}
-                Dim ColSize() As Integer = {100, 10, 50, 50, 50, 100}
+                Dim ColName() As String = {"PO No", "PO Date", "Licence Code", "Token", "Created Date", "AI Account No", "Activated Date", "Expired Date", "Status"}
+                Dim ColData() As String = {"PO No", "PO Date", "Licence Code", "Token", "Created Date", "AI Account No", "Activated Date", "Expired Date", "Status"}
+                Dim ColSize() As Integer = {50, 50, 100, 10, 50, 50, 50, 50, 100}
 
                 For i = 0 To ColData.Length - 1
                     Dim Bfield As BoundField = New BoundField()
@@ -632,6 +632,16 @@ Partial Class Form_App_Product_Licence_Form
             OS_Type.SelectedIndex = OS_Type.Items.IndexOf(OS_Type.Items.FindByText("Web"))
         End If
 
+        '' Check to turn on / off AI Account Selection based on Licence Type
+        If Trim(Application_Type.Text).ToLower.Contains("ai gateway") Then
+            aiaccountno.Visible = True
+            CompareValidator_DDL_AI_Account_No.Enabled = True
+            DDL_AI_Account_No.SelectedIndex = -1   '' Default the selection
+        Else
+            aiaccountno.Visible = False
+            CompareValidator_DDL_AI_Account_No.Enabled = False
+        End If
+
         popupAppProductLicence.Show()
         hiddenModalVisible.Value = True
     End Sub
@@ -690,6 +700,24 @@ Partial Class Form_App_Product_Licence_Form
         DDL_Chargeable.SelectedIndex = i
     End Sub
 
+    Protected Sub DDL_AI_Account_No_Load(sender As Object, e As EventArgs) Handles DDL_AI_Account_No.Load
+        If Not IsPostBack Then
+            Try
+                Dim sqlStr As String = " SELECT Client_ID AS [Account No], Client_ID + ' ' + User_Group AS [Account Name] " &
+                                       " FROM CZL_Account " &
+                                       " WHERE LEN(AI_Gateway_Key) < 1 " &
+                                       " ORDER BY CAST(Client_ID AS int) DESC "
+
+                DDL_AI_Account_No.DataSource = GetDataTable(sqlStr)
+                DDL_AI_Account_No.DataTextField = "Account Name"
+                DDL_AI_Account_No.DataValueField = "Account No"
+                DDL_AI_Account_No.DataBind()
+            Catch ex As Exception
+                Response.Write("Error: " & ex.Message)
+            End Try
+        End If
+    End Sub
+
 
     Protected Sub Add_AppProductLicence_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnAddAppProductLicence.Click
         ModalHeaderAppProductLicence.Text = "Add App / Product Licence"
@@ -700,11 +728,19 @@ Partial Class Form_App_Product_Licence_Form
         TB_PO_Date.Text = String.Empty
         TB_PO_Date.Enabled = True
         RequiredField_TB_PO_Date.Enabled = True
+        DDL_Application_Type.SelectedIndex = -1
+        DDL_Sales_Representative.SelectedIndex = -1
+
         Dim DDL_Chargeable As DropDownList = pnlAddEditAppProductLicence.FindControl("DDL_Chargeable")
         Dim i = DDL_Chargeable.Items.IndexOf(DDL_Chargeable.Items.FindByText("Yes"))
         DDL_Chargeable.SelectedIndex = i
         TB_Email.Text = String.Empty
         TB_Remarks.Text = String.Empty
+
+        '' AI Account Selection Dropdownlist set to invisible
+        aiaccountno.Visible = False
+        CompareValidator_DDL_AI_Account_No.Enabled = False
+        DDL_AI_Account_No.SelectedIndex = -1
 
         '' hide the tr row when the error message is.
         licencelistboxerrormsg.Visible = False
@@ -839,20 +875,34 @@ Partial Class Form_App_Product_Licence_Form
         Dim Email As TextBox = pnlAddEditAppProductLicence.FindControl("TB_Email")
         Dim Remarks As TextBox = pnlAddEditAppProductLicence.FindControl("TB_Remarks")
 
+        Dim AI_Account_No As DropDownList = pnlAddEditAppProductLicence.FindControl("DDL_AI_Account_No")
+        Dim Selected_AI_Account_No As String = IIf(AI_Account_No.SelectedIndex < 0, 0, AI_Account_No.SelectedValue)
+
         Dim GridView_Licence_List As GridView = pnlAddEditAppProductLicence.FindControl("GridView_Licence_List")
         Dim UploadedRecordCount As Integer = GridView_Licence_List.Rows.Count
 
-        If UploadedRecordCount > 0 Then
+
+        If Application_Type.SelectedValue = "AI Gateway" AndAlso UploadedRecordCount <> 1 Then
+            If UploadedRecordCount = 0 Then
+                AlertMessage("Please upload licence file.")
+                licencelistboxerrormsg.Visible = True
+                popupAppProductLicence.Show()
+                hiddenModalVisible.Value = True
+            Else
+                AlertMessage("Please upload AI Gateway Licence one at time.\nOne AI Gateway Licence Key bind to one AI Account.")
+            End If
+        ElseIf UploadedRecordCount > 0 Then
             Try
                 Dim sqlStr As String = " EXEC SP_CRUD_LMS_Licence '" & Customer_ID &
-                                                             "', N'" & PO_No.Text &
-                                                              "', '" & PO_Date.Text &
-                                                              "', '" & Application_Type.Text &
-                                                              "', '" & Sales_Representative_ID.Text &
-                                                              "', '" & Chargeable.SelectedValue &
-                                                              "', '" & OS_Type.Text &
-                                                              "', '" & Email.Text &
-                                                             "', N'" & EscapeChar(Remarks.Text) & "' "
+                                                                 "', N'" & PO_No.Text &
+                                                                  "', '" & PO_Date.Text &
+                                                                  "', '" & Application_Type.Text &
+                                                                  "', '" & Sales_Representative_ID.Text &
+                                                                  "', '" & Chargeable.SelectedValue &
+                                                                  "', '" & OS_Type.Text &
+                                                                  "', '" & Email.Text &
+                                                                 "', N'" & EscapeChar(Remarks.Text) &
+                                                                  "', '" & Trim(Selected_AI_Account_No) & "' "
                 RunSQL(sqlStr)
             Catch ex As Exception
                 Response.Write("Error: " & ex.Message)
