@@ -157,7 +157,7 @@ Partial Class Listings_App_Product_Licence
             If Replace(PO_Date, "&nbsp;", "") = "" Then
                 PO_Date = ""
             Else
-                CDate(PO_Date).ToString("yyyy-MM-dd")
+                PO_Date = CDate(PO_Date).ToString("yyyy-MM-dd")
             End If
 
             Dim query As String = " SELECT * FROM I_LMS_Licence " &

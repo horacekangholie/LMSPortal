@@ -268,11 +268,11 @@
                                     </td>
                                 </tr>
                                 <tr style="vertical-align: top">
-                                    <td style="width: 45%; padding: 0px 10px 20px 0px">
+                                    <td style="width: 45%; padding: 0px 10px 0px 0px">
                                         <label>Module Type</label>
                                         <asp:DropDownList ID="DDL_Order_Module_Type" runat="server" AutoPostBack="true" CssClass="form-control"></asp:DropDownList>
                                     </td>
-                                    <td style="width: 25%; padding: 0px 10px 20px 0px">
+                                    <td style="width: 25%; padding: 0px 10px 0px 0px">
                                         <label>Quantity</label>
                                         <asp:TextBox ID="TB_Order_Quantity" runat="server" CssClass="form-control" placeholder="0"></asp:TextBox>
                                         <asp:RequiredFieldValidator ID="RequiredField_TB_Order_Quantity" runat="server" ValidationGroup="ModuleLicenceOrder"
@@ -288,8 +288,16 @@
                                             ControlToValidate="TB_Order_Quantity"
                                             ValidationExpression="^(0|[1-9]\d*)$">
                                         </asp:RegularExpressionValidator>
+                                        <asp:CustomValidator ID="CustomValidator_TB_Order_Quantity" runat="server" ValidationGroup="ModuleLicenceOrder"
+                                            ErrorMessage="Quantity cannot be 0" CssClass="invalid-feedback"
+                                            Display="Dynamic"
+                                            SetFocusOnError="True"
+                                            ControlToValidate="TB_Order_Quantity"
+                                            OnServerValidate="CustomValidator_TB_Order_Quantity_ServerValidate">
+                                        </asp:CustomValidator>
+                                        <label id="licenceorderquantityerrormsg" runat="server" style="font-size: 12px; font-weight: normal; color: #dc3545"></label>
                                     </td>
-                                    <td style="width: 30%; padding: 25px 10px 20px 0px">
+                                    <td style="width: 30%; padding: 25px 10px 0px 0px">
                                         <asp:Button ID="AddOrderLineItems" runat="server" Text="Add" Height="40px" CssClass="btn btn-info" ValidationGroup="ModuleLicenceOrder" />
                                         <asp:Button ID="btnClearOrderLineItems" runat="server" Text="Clear" Height="40px" CssClass="btn btn-info" />
                                     </td>
@@ -322,7 +330,7 @@
                                 </tr>
                                 <tr style="vertical-align: bottom">
                                     <td style="width: 800px; padding: 20px 10px 10px 0px" colspan="3">
-                                        <asp:Button ID="btnSaveModuleLicenceOrder" runat="server" CssClass="btn btn-sm btn-default" ValidationGroup="ModuleLicenceOrder" />
+                                        <asp:Button ID="btnSaveModuleLicenceOrder" runat="server" CssClass="btn btn-sm btn-default" CausesValidation="false" ValidationGroup="ModuleLicenceOrder" />
                                         <asp:Button ID="btnCancelModuleLicenceOrder" runat="server" CssClass="btn btn-sm btn-default" CausesValidation="false" OnClientClick="return Hidepopup()" />
                                     </td>
                                 </tr>
@@ -370,19 +378,7 @@
                                             ControlToValidate="TB_Module_Licence_Quantity"
                                             ValidationExpression="^\d+$">
                                         </asp:RegularExpressionValidator>
-                                        <asp:CustomValidator ID="CustomValidator_TB_Module_Licence_Quantity" runat="server" ValidationGroup="ModuleLicenceCount"
-                                            ErrorMessage="Quantity cannot be 0" CssClass="invalid-feedback"
-                                            Display="Dynamic"
-                                            SetFocusOnError="True"
-                                            ControlToValidate="TB_Module_Licence_Quantity"
-                                            OnServerValidate="CustomValidator_TB_Module_Licence_Quantity_ServerValidate">
-                                        </asp:CustomValidator>
-                                    </td>
-                                </tr>
-                                <tr id="licenceorderquantityerrormsg" runat="server" style="vertical-align: top" visible="false">
-                                    <td style="padding: 0px 0px 0px 0px"></td>
-                                    <td style="padding: 0px 0px 0px 0px">
-                                        <span style="font-size: 11px; color: #dc3545">Quantity cannot be zero</span>
+                                        <label id="licenceorderupdatequantityerrormsg" runat="server" style="font-size: 12px; font-weight: normal; color: #dc3545"></label>
                                     </td>
                                 </tr>
                                 <tr style="vertical-align: bottom">

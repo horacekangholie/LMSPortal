@@ -33,7 +33,7 @@ Partial Class Listings_Module_Licence
                          "		                          SUM(Quantity) " &
                          " 		                          FOR Module_Type IN ([e.Sense], [BYOC], [AI]) " &
                          "	                           ) AS PivotTable ) I ON I.UID = ML.UID " &
-                         " WHERE C.Name LIKE '%" & keyword & "%' OR ML.PO_No LIKE '%" & keyword & "%' OR S.Name LIKE '%" & keyword & "%' " &
+                         " WHERE PO_No NOT IN ('NA') AND (C.Name LIKE '%" & keyword & "%' OR ML.PO_No LIKE '%" & keyword & "%' OR S.Name LIKE '%" & keyword & "%') " &
                          " ORDER BY CASE ML.PO_No WHEN 'NA' THEN 2 ELSE 1 END, ML.Created_Date DESC "
 
             BuildGridView()
@@ -178,7 +178,7 @@ Partial Class Listings_Module_Licence
             If Replace(PO_Date, "&nbsp;", "") = "" Then
                 PO_Date = ""
             Else
-                CDate(PO_Date).ToString("yyyy-MM-dd")
+                PO_Date = CDate(PO_Date).ToString("yyyy-MM-dd")
             End If
 
             Dim query As String = " SELECT [Customer ID] " &

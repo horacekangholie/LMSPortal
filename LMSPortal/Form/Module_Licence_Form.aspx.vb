@@ -730,6 +730,11 @@ Partial Class Form_Module_Licence_Form
         TB_Order_Remarks.Text = String.Empty
         TB_Order_Quantity.Text = String.Empty
 
+        RequiredField_TB_Order_Quantity.Enabled = True  '' Enable the field validation when adding module license order
+
+        '' Hide the license zero count message
+        licenceorderquantityerrormsg.InnerText = String.Empty
+
         '' hide the tr row when the error message is.
         licenceorderlistboxerrormsg.Visible = False
 
@@ -743,12 +748,18 @@ Partial Class Form_Module_Licence_Form
         Dim Module_Type As DropDownList = pnlAddEditModuleLicenceOrder.FindControl("DDL_Order_Module_Type")
         Dim Quantity As TextBox = pnlAddEditModuleLicenceOrder.FindControl("TB_Order_Quantity")
 
-        Try
-            Dim sqlStr = " EXEC SP_Insert_Module_Licence_Staging '" & Customer_ID & "', '" & EscapeChar(PO_No.Text) & "', '" & Module_Type.Text & "', '" & Quantity.Text & "' "
-            RunSQL(sqlStr)
-        Catch ex As Exception
-            Response.Write("Error: " & ex.Message)
-        End Try
+        If CInt(Quantity.Text) > 0 Then
+            Try
+                Dim sqlStr = " EXEC SP_Insert_Module_Licence_Staging '" & Customer_ID & "', '" & EscapeChar(PO_No.Text) & "', '" & Module_Type.Text & "', '" & Quantity.Text & "' "
+                RunSQL(sqlStr)
+            Catch ex As Exception
+                Response.Write("Error: " & ex.Message)
+            End Try
+
+            '' Reset the field and hide the message after sucess add the module license count
+            Quantity.Text = String.Empty
+            licenceorderquantityerrormsg.InnerText = String.Empty
+        End If
 
         licenceorderlistboxerrormsg.Visible = False
 
@@ -793,7 +804,6 @@ Partial Class Form_Module_Licence_Form
         Dim Module_Type As DropDownList = pnlAddEditModuleLicenceOrder.FindControl("DDL_Order_Module_Type")
         Dim Quantity As TextBox = pnlAddEditModuleLicenceOrder.FindControl("TB_Order_Quantity")
 
-
         Dim GridView_Order_List As GridView = pnlAddEditModuleLicenceOrder.FindControl("GridView_Order_List")
         Dim UploadedRecordCount As Integer = GridView_Order_List.Rows.Count
 
@@ -822,7 +832,7 @@ Partial Class Form_Module_Licence_Form
         End If
 
         DeleteStaging()
-        'PopulateFormViewData()
+        'PopulateFormViewData()   '' Formview do not need to populate again
         PopulateGridViewData()
     End Sub
 
@@ -852,7 +862,9 @@ Partial Class Form_Module_Licence_Form
         TB_Selected_Quantity_By_Module_Type.Text = Get_Value("SELECT Quantity FROM LMS_Module_Licence_Order_Item WHERE UID = '" & TB_Selected_UID.Text & "' AND Module_Type = '" & Module_Licence_Type.SelectedValue & "'", "Quantity")
         Module_Licence_Quantity.Text = TB_Selected_Quantity_By_Module_Type.Text
 
-        licenceorderquantityerrormsg.Visible = False
+        RequiredField_TB_Order_Quantity.Enabled = True
+        licenceorderquantityerrormsg.InnerText = String.Empty
+        licenceorderupdatequantityerrormsg.InnerText = String.Empty
 
         popupUpdateModuleLicenceCount.Show()
     End Sub
@@ -865,7 +877,8 @@ Partial Class Form_Module_Licence_Form
         '' Reinitialize the field
         DDL_Module_Licence_Type.SelectedIndex = -1
         TB_Module_Licence_Quantity.Text = String.Empty
-        licenceorderquantityerrormsg.Visible = False
+        licenceorderquantityerrormsg.InnerText = String.Empty
+        licenceorderupdatequantityerrormsg.InnerText = String.Empty
 
         ' Get row command argument, get the value and pass them to hidden fields
         Dim EditLinkButton As LinkButton = TryCast(sender, LinkButton)
@@ -898,7 +911,8 @@ Partial Class Form_Module_Licence_Form
                 Response.Write("Error: " & ex.Message)
             End Try
         Else
-            AlertMessageMsgBox("Cannot be less than existing quantity")
+            licenceorderupdatequantityerrormsg.InnerText = "Cannot be less than existing quantity"
+            popupUpdateModuleLicenceCount.Show()
         End If
 
 
@@ -906,15 +920,17 @@ Partial Class Form_Module_Licence_Form
         PopulateGridViewData()
     End Sub
 
-    Protected Sub CustomValidator_TB_Module_Licence_Quantity_ServerValidate(source As Object, args As ServerValidateEventArgs)
+    Protected Sub CustomValidator_TB_Order_Quantity_ServerValidate(source As Object, args As ServerValidateEventArgs)
         Dim quantity As Integer
         If Integer.TryParse(args.Value, quantity) Then
             args.IsValid = (quantity <> 0)
         Else
             args.IsValid = False ' Fallback in case of non-integer input
         End If
-        popupUpdateModuleLicenceCount.Show()
-        licenceorderquantityerrormsg.Visible = True
+        licenceorderquantityerrormsg.InnerText = "Quantity cannot be zero"
+
+        PopulateOrderListbox()
+        popupModuleLicenceOrder.Show()
     End Sub
 
 

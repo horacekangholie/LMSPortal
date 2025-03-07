@@ -340,7 +340,6 @@ Partial Class Views_Subscription_Details
             End If
 
         End If
-        e.Row.Cells(0).Visible = False  '' Hide Headquarter_ID column
     End Sub
 
     Protected Sub GridView4_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs) Handles GridView4.RowDataBound
