@@ -188,7 +188,7 @@ Partial Class Form_CZL_Account_Form
                                                       ", N'" & By_Distributor.SelectedValue & "' " &
                                                       ", N'" & Country.SelectedValue & "' " &
                                                       ", N'" & Gen_Version.SelectedValue & "' " &
-                                                      ", N'" & Effective_Date.Text & "' " &
+                                                      ", N'" & ConverDateFormat(Effective_Date.Text) & "' " &
                                                       ", N'" & BtnCommand.CommandName & "' "
 
         Try
@@ -208,7 +208,7 @@ Partial Class Form_CZL_Account_Form
                     Dim sqlStr1 As String = "EXEC SP_CRUD_CZL_Account_Setup_Charge N'" & CZL_Account_Unique_ID & "' " &
                                                                                 ", N'" & CZL_Client_ID.Text & "' " &
                                                                                 ", N'" & PO_No.Text & "' " &
-                                                                                ", N'" & PO_Date.Text & "' " &
+                                                                                ", N'" & ConverDateFormat(PO_Date.Text) & "' " &
                                                                                 ", N'" & Currency.SelectedValue & "' " &
                                                                                 ", N'" & Fee.Text & "' " &
                                                                                 ", N'" & Sales_Representative.SelectedValue & "' "

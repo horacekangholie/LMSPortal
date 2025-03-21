@@ -530,6 +530,18 @@ Public Class LMSPortalBaseCode
         Return hours.ToString("D2") & ":" & minutes.ToString("D2")
     End Function
 
+    Protected Function ConverDateFormat(ByVal dateStr As String) As String
+        ' Normalize "Sept" to "Sep" to match the standard three-letter month format
+        dateStr = dateStr.Replace("Sept ", "Sep ")
+
+        Dim parsedDate As DateTime
+        If DateTime.TryParseExact(dateStr, "dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, parsedDate) Then
+            Return parsedDate.ToString("yyyy-MM-dd")
+        Else
+            Return dateStr ' Return original string if parsing fails
+        End If
+    End Function
+
 
 
 
