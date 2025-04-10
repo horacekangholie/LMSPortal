@@ -212,8 +212,12 @@ Partial Class Adhoc_Suspended_Stores
         Try
             Dim sqlStr As String = "INSERT INTO Suspended_Store(Store_ID, Store_Name, Suspended_Date, Reason) " &
                                    "SELECT '" & DDL_Store.SelectedValue & "', '" & EscapeChar(DDL_Store.SelectedItem.Text) & "', '" & DDL_Suspend_From_Month.SelectedValue & "', '" & TB_Reason.Text & "'; " &
-                                   "UPDATE DMC_Store SET Is_Active = 0 WHERE Store_ID = '" & DDL_Store.SelectedValue & "' "
-            RunSQL(sqlStr)
+                                   "UPDATE DMC_Store SET Is_Active = 0 WHERE Store_ID = '" & DDL_Store.SelectedValue & "'; " &
+                                   "UPDATE DMC_User " &
+                                   "   SET Is_Active = (CASE WHEN (SELECT COUNT(*) FROM DMC_Store WHERE Headquarter_ID = '" & DDL_Headquarter.SelectedValue & "' AND Is_Active = 1) = 0 THEN 0 ELSE Is_Active END) " &
+                                   " , Inactive_Date = GETDATE() " &
+                                   "WHERE Headquarter_ID = '" & DDL_Headquarter.SelectedValue & "' AND Is_Active = 1; "
+            'RunSQL(sqlStr)
         Catch ex As Exception
             Response.Write("ERROR: " & ex.Message)
         End Try
