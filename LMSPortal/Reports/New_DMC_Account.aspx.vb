@@ -25,8 +25,8 @@ Partial Class Reports_New_DMC_Account
     Protected Sub PopulateGridViewData()
         Try
             Dim sqlStr() As String = {"SELECT TOP 7 * FROM D_DMC_Subscription_Outstanding_Invoice ORDER BY [Subscription ID] DESC ",
-                                      "SELECT * FROM R_DMC_Store_Licence WHERE DATEDIFF(d, CAST([Created Date] AS date), CAST(GETDATE() AS date)) <= 7 ORDER BY [Created Date] DESC, ID ",
-                                      "SELECT * FROM R_DMC_User_Licence WHERE DATEDIFF(d, CAST([Created Date] AS date), CAST(GETDATE() AS date)) <= 7 ORDER BY [Created Date] DESC, ID "}
+                                      "SELECT * FROM R_DMC_Store_Licence WHERE DATEDIFF(d, CAST([Created Date] AS date), CAST(GETDATE() AS date)) <= 7 ORDER BY [Created Date] DESC, ID DESC ",
+                                      "SELECT * FROM R_DMC_User_Licence WHERE DATEDIFF(d, CAST([Created Date] AS date), CAST(GETDATE() AS date)) <= 7 ORDER BY [Created Date] DESC, ID DESC "}
 
             BuildGridView(GridView1, "GridView1", "Subscription ID")
             GridView1.DataSource = GetDataTable(sqlStr(0))
