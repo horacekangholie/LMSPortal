@@ -30,6 +30,20 @@
             border-top: none;
         }
 
+        .tab-box-multiple-table {
+            padding: 10px 10px 40px 10px !important;
+            border: solid 1px !important;
+            border-color: #fff #dee2e6 #dee2e6 !important;
+            border-top: none;
+            display: flex;
+            gap: 10px;       /* 10px space between each flex item */
+        }
+
+        .tab-box-multiple-table .gridview-wrapper {
+            flex: 1;         /* each grid takes equal width */
+            padding: 10px;   /* 10px padding around each grid */
+        }
+
         .dropdownlist-guided-text{
             margin-bottom: 10px;
             margin-left: 5px;
@@ -81,6 +95,7 @@
         <ul class='nav nav-tabs' id="myTab" role="tablist">
             <li id="tab_link1" runat="server" visible="true" class="nav-item" role="presentation"><a id="link1" class="nav-link active" data-toggle="tab" href="#RevenueMonthly" aria-selected="true" role="tab"  style="font-size: 15px; width: 150px; text-align: center">Monthly Details</a></li>
             <li id="tab_link2" runat="server" visible="true" class="nav-item" role="presentation"><a id="link2" class="nav-link" data-toggle="tab" href="#RevenueOverview" aria-selected="false" tabindex="-1" role="tab" style="font-size: 15px; width: 150px; text-align: center">Yearly Overview</a></li>
+            <%--<li id="tab_link3" runat="server" visible="true" class="nav-item" role="presentation"><a id="link3" class="nav-link" data-toggle="tab" href="#Statistics" aria-selected="false" tabindex="-1" role="tab" style="font-size: 15px; width: 150px; text-align: center">Statistics</a></li>--%>
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane active" id="RevenueMonthly" role="tabpanel">
@@ -89,7 +104,9 @@
                         <div class="dropdownlist-guided-text"><b>Note: </b>View report of past 15 months.</div>
                         <asp:DropDownList ID="DDL_ReportMonth" runat="server" CssClass="form-control w-25" AutoPostBack="true"></asp:DropDownList>
                     </div>
-                    <asp:GridView ID="GridView1" runat="server" AllowSorting="false">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <asp:GridView ID="GridView1" runat="server" AllowSorting="false">
                         <Columns>
                             <asp:BoundField DataField="Device_Type" HeaderText="Account Type" SortExpression="Device_Type" ItemStyle-Width="100" ItemStyle-Wrap="false" />
                             <asp:BoundField DataField="Country" HeaderText="Country" SortExpression="Country" ItemStyle-Width="50" ItemStyle-Wrap="false" />
@@ -101,6 +118,19 @@
                             <asp:BoundField DataField="Average" HeaderText="Average" SortExpression="Average" DataFormatString="{0:#,##0.00}" ItemStyle-Width="10" ItemStyle-Wrap="false" />
                         </Columns>
                     </asp:GridView>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <asp:GridView ID="GridView3" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                            <div class="mb-4">
+                                <asp:GridView ID="GridView4" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                            <div>
+                                <asp:GridView ID="GridView5" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane" id="RevenueOverview" role="tabpanel">
@@ -120,6 +150,23 @@
                     <asp:GridView ID="GridView2" runat="server"></asp:GridView>
                 </div>
             </div>
+            <%--<div class="tab-pane" id="Statistics" role="tabpanel">
+                <div class="tab-box-multiple-table">
+                    <div class="gridview-wrapper">
+                        <asp:GridView ID="GridView3" runat="server" CssClass="table table-striped">
+                        </asp:GridView>
+                    </div>
+                    <div class="gridview-wrapper">
+                        <asp:GridView ID="GridView4" runat="server" CssClass="table table-striped">
+                        </asp:GridView>
+                    </div>
+                    <div class="gridview-wrapper">
+                        <asp:GridView ID="GridView5" runat="server" CssClass="table table-striped">
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>--%>
+
         </div>
     </div>
 
