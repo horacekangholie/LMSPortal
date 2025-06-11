@@ -89,18 +89,33 @@
                         <div class="dropdownlist-guided-text"><b>Note: </b>View report of past 15 months.</div>
                         <asp:DropDownList ID="DDL_ReportMonth" runat="server" CssClass="form-control w-25" AutoPostBack="true"></asp:DropDownList>
                     </div>
-                    <asp:GridView ID="GridView1" runat="server" AllowSorting="false">
-                        <Columns>
-                            <asp:BoundField DataField="Device_Type" HeaderText="Account Type" SortExpression="Device_Type" ItemStyle-Width="100" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Country" HeaderText="Country" SortExpression="Country" ItemStyle-Width="50" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Headquarter_ID" HeaderText="Headquarter ID" SortExpression="Headquarter_ID" ItemStyle-Width="50" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Headquarter_Name" HeaderText="Headquarter Name" SortExpression="Headquarter_Name" ItemStyle-Width="500" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Owned_Store" HeaderText="Owned Store" SortExpression="Owned_Store" DataFormatString="{0:#}" ItemStyle-Width="50" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Currency" HeaderText="Currency" SortExpression="Currency" ItemStyle-Width="0" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Total_Amount_Per_Month" HeaderText="Total Amount (Monthly)" HeaderStyle-CssClass="header-break" SortExpression="Total_Amount_Per_Month" ItemStyle-Width="0" ItemStyle-Wrap="false" />
-                            <asp:BoundField DataField="Average" HeaderText="Average" SortExpression="Average" DataFormatString="{0:#,##0.00}" ItemStyle-Width="10" ItemStyle-Wrap="false" />
-                        </Columns>
-                    </asp:GridView>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <asp:GridView ID="GridView1" runat="server" AllowSorting="false">
+                                <Columns>
+                                    <asp:BoundField DataField="Device_Type" HeaderText="Account Type" SortExpression="Device_Type" ItemStyle-Width="100" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Country" HeaderText="Country" SortExpression="Country" ItemStyle-Width="50" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Headquarter_ID" HeaderText="Headquarter ID" SortExpression="Headquarter_ID" ItemStyle-Width="50" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Headquarter_Name" HeaderText="Headquarter Name" SortExpression="Headquarter_Name" ItemStyle-Width="500" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Owned_Store" HeaderText="Owned Store" SortExpression="Owned_Store" DataFormatString="{0:#}" ItemStyle-Width="50" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Currency" HeaderText="Currency" SortExpression="Currency" ItemStyle-Width="0" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Total_Amount_Per_Month" HeaderText="Total Amount (Monthly)" HeaderStyle-CssClass="header-break" SortExpression="Total_Amount_Per_Month" ItemStyle-Width="0" ItemStyle-Wrap="false" />
+                                    <asp:BoundField DataField="Average" HeaderText="Average" SortExpression="Average" DataFormatString="{0:#,##0.00}" ItemStyle-Width="10" ItemStyle-Wrap="false" />
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <asp:GridView ID="GridView3" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                            <div class="mb-4">
+                                <asp:GridView ID="GridView4" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                            <div>
+                                <asp:GridView ID="GridView5" runat="server" CssClass="table table-striped"></asp:GridView>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane" id="RevenueOverview" role="tabpanel">

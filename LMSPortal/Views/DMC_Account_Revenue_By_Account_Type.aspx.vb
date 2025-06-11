@@ -1,13 +1,11 @@
 ﻿Imports System.Data
 Imports System.Data.SqlClient
 
-
 Partial Class Views_DMC_Account_Revenue_By_Account_Type
     Inherits LMSPortalBaseCode
 
     Dim PageTitle As String = "DMC Revenue By Account Type"
     Dim HeadquarterCount, StoreCount, TotalAmount As String
-    Dim currentSortedColumnIndex As Integer
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         LB_PageTitle.Text = PageTitle
@@ -51,7 +49,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
 
 
                 '' Populate Gridview
-                BuildContenctPage(Nothing, DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
+                BuildContentPage(Nothing, DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
 
             Catch ex As Exception
                 Response.Write("Error - Country Dropdownlist: " & ex.Message)
@@ -63,7 +61,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
 
     End Sub
 
-    Protected Sub BuildContenctPage(Optional ByVal ReportMonth As String = Nothing, Optional ByVal Country As String = Nothing, Optional DeviceType As String = Nothing)
+    Protected Sub BuildContentPage(Optional ByVal ReportMonth As String = Nothing, Optional ByVal Country As String = Nothing, Optional DeviceType As String = Nothing)
         '' if ReportMonth value is empty then use the default month
         ReportMonth = IIf(ReportMonth Is Nothing, DateSerial(Year(Now), Month(Now) - 1, 1).ToString("yyyy-MM-dd"), ReportMonth)
 
@@ -85,7 +83,10 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
             RunSQL("EXEC dbo.SP_Insert_TempTable_DMC_Monthly_Revenue_By_Account_Type_Summary '" & StartMonth & "', '" & EndMonth & "', '" & Country & "', '" & DeviceType & "' ")
 
             Dim sqlStr() As String = {"SELECT * FROM dbo.DMC_Monthly_Subscription_By_Account_Type('" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') ",
-                                      "SELECT * FROM R_DMC_Subscription_Revenue_By_Account_Type_Overview ORDER BY [Year] DESC, CASE Col WHEN 'Amount' THEN 1 WHEN 'No of Store' THEN 2 ELSE 3 END "}
+                                      "SELECT * FROM R_DMC_Subscription_Revenue_By_Account_Type_Overview ORDER BY [Year] DESC, CASE Col WHEN 'Amount' THEN 1 WHEN 'No of Store' THEN 2 ELSE 3 END ",
+                                      "SELECT Category AS Country, Stores, Total, Average FROM DMC_Monthly_Subscription_Statistics ('ByCountry', '" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') ORDER BY CASE Category WHEN 'Total' THEN 1 ELSE 0 END ",
+                                      "SELECT Category AS Customer, Stores, Total, Average FROM DMC_Monthly_Subscription_Statistics ('ByCustomer', '" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') ORDER BY CASE Category WHEN 'Total' THEN 2 WHEN 'Others' THEN 1 ELSE 0 END ",
+                                      "SELECT Category AS Segment, Stores, Total, Average FROM DMC_Monthly_Subscription_Statistics ('BySegment', '" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') ORDER BY CASE Category WHEN 'Total' THEN 1 ELSE 0 END "}
 
             ' Build and bind Gridview
             BuildGridView(GridView1, "GridView1", "Headquarter_ID")
@@ -95,6 +96,18 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
             BuildGridView(GridView2, "GridView2", "Year")
             GridView2.DataSource = GetDataTable(sqlStr(1))
             GridView2.DataBind()
+
+            BuildGridView(GridView3, "GridView3", "Country")
+            GridView3.DataSource = GetDataTable(sqlStr(2))
+            GridView3.DataBind()
+
+            BuildGridView(GridView4, "GridView4", "Customer")
+            GridView4.DataSource = GetDataTable(sqlStr(3))
+            GridView4.DataBind()
+
+            BuildGridView(GridView5, "GridView5", "Segment")
+            GridView5.DataSource = GetDataTable(sqlStr(4))
+            GridView5.DataBind()
 
         Catch ex As Exception
             Response.Write("Error:  " & ex.Message)
@@ -158,13 +171,70 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
                     Bfield.ItemStyle.Wrap = False
                     GridViewObj.Columns.Add(Bfield)
                 Next
+
+            Case "GridView3"
+                GridViewObj.AllowPaging = False
+                GridViewObj.AllowSorting = True
+                GridViewObj.Columns.Clear()
+                Dim ColName() As String = {"Country", "Stores", "Total", "Average"}
+                Dim ColData() As String = {"Country", "Stores", "Total", "Average"}
+                For i = 0 To ColData.Length - 1
+                    Dim Bfield As BoundField = New BoundField()
+                    Bfield.DataField = ColData(i)
+                    Bfield.SortExpression = ColData(i)
+                    Bfield.HeaderText = Replace(ColName(i), "_", " ")
+                    If Bfield.HeaderText.Contains("Total") Or Bfield.HeaderText.Contains("Average") Then
+                        Bfield.DataFormatString = "{0:#,##0}"
+                    End If
+                    Bfield.HeaderStyle.Wrap = False
+                    Bfield.ItemStyle.Wrap = False
+                    GridViewObj.Columns.Add(Bfield)
+                Next
+
+            Case "GridView4"
+                GridViewObj.AllowPaging = False
+                GridViewObj.AllowSorting = True
+                GridViewObj.Columns.Clear()
+                Dim ColName() As String = {"Customer", "Stores", "Total", "Average"}
+                Dim ColData() As String = {"Customer", "Stores", "Total", "Average"}
+                For i = 0 To ColData.Length - 1
+                    Dim Bfield As BoundField = New BoundField()
+                    Bfield.DataField = ColData(i)
+                    Bfield.SortExpression = ColData(i)
+                    Bfield.HeaderText = Replace(ColName(i), "_", " ")
+                    If Bfield.HeaderText.Contains("Total") Or Bfield.HeaderText.Contains("Average") Then
+                        Bfield.DataFormatString = "{0:#,##0}"
+                    End If
+                    Bfield.HeaderStyle.Wrap = False
+                    Bfield.ItemStyle.Wrap = False
+                    GridViewObj.Columns.Add(Bfield)
+                Next
+
+            Case "GridView5"
+                GridViewObj.AllowPaging = False
+                GridViewObj.AllowSorting = True
+                GridViewObj.Columns.Clear()
+                Dim ColName() As String = {"Segment", "Stores", "Total", "Average"}
+                Dim ColData() As String = {"Segment", "Stores", "Total", "Average"}
+                For i = 0 To ColData.Length - 1
+                    Dim Bfield As BoundField = New BoundField()
+                    Bfield.DataField = ColData(i)
+                    Bfield.SortExpression = ColData(i)
+                    Bfield.HeaderText = Replace(ColName(i), "_", " ")
+                    If Bfield.HeaderText.Contains("Total") Or Bfield.HeaderText.Contains("Average") Then
+                        Bfield.DataFormatString = "{0:#,##0}"
+                    End If
+                    Bfield.HeaderStyle.Wrap = False
+                    Bfield.ItemStyle.Wrap = False
+                    GridViewObj.Columns.Add(Bfield)
+                Next
         End Select
     End Sub
 
 
 
     ''Gridview controls
-    Private Sub GridView_RowCreated(sender As Object, e As GridViewRowEventArgs) Handles GridView1.RowCreated, GridView2.RowCreated
+    Private Sub GridView_RowCreated(sender As Object, e As GridViewRowEventArgs) Handles GridView1.RowCreated, GridView2.RowCreated, GridView3.RowCreated, GridView4.RowCreated, GridView5.RowCreated
         ' Call javascript function for GridView Row highlight effect
         If e.Row.RowType = DataControlRowType.DataRow Then
             e.Row.Attributes.Add("OnMouseOver", "javascript:SetMouseOver(this);")
@@ -172,64 +242,27 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
         End If
     End Sub
 
-    Protected Sub GridView1_PreRender(sender As Object, e As EventArgs) Handles GridView1.PreRender
-        ' Remove sorting arrow whenever the page is postback
-        If GridView1.HeaderRow IsNot Nothing Then
-            For Each cell As TableCell In GridView1.HeaderRow.Cells
-                Dim span As Control = cell.Controls.OfType(Of HtmlGenericControl)().FirstOrDefault(Function(c) c.Attributes("class") = "sort-arrow")
-                If span IsNot Nothing Then
-                    cell.Controls.Remove(span)
-                End If
-            Next
-        End If
+    Protected Sub GridView_PreRender(sender As Object, e As EventArgs) Handles GridView1.PreRender, GridView3.PreRender, GridView4.PreRender, GridView5.PreRender
+        Dim GridViewObj As GridView = CType(sender, GridView)
+        RemoveSortArrowsFromGridView(GridViewObj)  ' Remove sorting arrow whenever the page is postback
     End Sub
 
     Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs) Handles GridView1.RowDataBound
+        Dim GridViewObj As GridView = CType(sender, GridView)
+
         If e.Row.RowType = DataControlRowType.Header Then
-            Dim sortExpression As String = ViewState("SortExpression")?.ToString()
-            Dim sortDirection As String = ViewState("SortDirection")?.ToString()
-
-            ' If sortExpression is empty, set it to the first column's SortExpression
-            If String.IsNullOrEmpty(sortExpression) Then
-                sortExpression = GridView1.Columns(0).SortExpression
-                sortDirection = "ASC"
-                currentSortedColumnIndex = 0
-            End If
-
-            ' Loop through the headerrow control field to find which is the current selected column
-            For Each field As DataControlField In GridView1.Columns
-                If field.SortExpression = sortExpression Then
-                    Dim cellIndex As Integer = GridView1.Columns.IndexOf(field)
-                    Dim sortArrow As New Label()
-                    sortArrow.CssClass = "sort-arrow " & If(sortDirection = "ASC", "asc", "desc")
-
-                    ' Add the sorting arrow inside a <span> element
-                    Dim span As New HtmlGenericControl("span")
-                    span.Controls.Add(sortArrow)
-
-                    ' Append the <span> to the header cell
-                    e.Row.Cells(cellIndex).Controls.Add(span)
-
-                    ' Get current sorted column index
-                    currentSortedColumnIndex = cellIndex
-                End If
-            Next
-
-            For i = 0 To e.Row.Cells.Count - 1
-                e.Row.Cells(i).VerticalAlign = VerticalAlign.Top
-                e.Row.Cells(i).Height = 60
-                If i > 3 Then
-                    e.Row.Cells(i).Style.Add("text-align", "right !important")
-                End If
-            Next
+            ' Use the reusable method to insert the sort arrow and set default column index
+            ApplySortArrow(GridViewObj, e.Row, 4)
 
         ElseIf e.Row.RowType = DataControlRowType.DataRow Then
+            ' For each DataRow, right-align columns after index 3
             For i = 0 To e.Row.Cells.Count - 1
                 If i > 3 Then
                     e.Row.Cells(i).HorizontalAlign = HorizontalAlign.Right
                 End If
-                e.Row.Cells(currentSortedColumnIndex).BackColor = Drawing.ColorTranslator.FromHtml("#ffffe6")
             Next
+            ' Highlight the cell in the currently sorted column
+            e.Row.Cells(currentSortedColumnIndex).BackColor = Drawing.ColorTranslator.FromHtml("#ffffe6")
         ElseIf e.Row.RowType = DataControlRowType.Footer Then
             e.Row.Cells(GetColumnIndexByName(e.Row, "Headquarter_Name")).Text = "Total Headquarter: " & HeadquarterCount
 
@@ -249,54 +282,31 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
     End Sub
 
     Protected Sub GridView1_Sorting(sender As Object, e As GridViewSortEventArgs) Handles GridView1.Sorting
-        '' if ReportMonth value is empty then use the default month
-        Dim ReportMonth As String = CDate(DDL_ReportMonth.SelectedValue).ToString("yyyy-MM-dd")
-        Dim sqlStr As String = "SELECT * FROM dbo.DMC_Monthly_Subscription_By_Account_Type('" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') "
+        Dim GridViewObj As GridView = CType(sender, GridView)
 
-        '' Get the Headquarter_Count, Store_Count, Total_Amount_Per_Month on Report Month
-        '' This is to repopulate the footer count when table is sorted
-        Dim dReader = RunSQLExecuteReader("SELECT COUNT(Headquarter_ID) AS Headquarter_Count, SUM(Owned_Store) AS Store_Count, SUM(Total_Amount_Per_Month) AS Total_Amount FROM dbo.DMC_Monthly_Subscription_By_Account_Type('" & GetEndOfMonthDate(ReportMonth).ToString("yyyy-MM-dd") & "') ")
-        While dReader.Read()
-            HeadquarterCount = String.Format("{0:0}", dReader("Headquarter_Count"))
-            StoreCount = String.Format("{0:0}", dReader("Store_Count"))
-            TotalAmount = String.Format("{0:#,##0.00}", dReader("Total_Amount"))
-        End While
-        dReader.Close()
+        ' Read selected month and load footer summary counts
+        Dim reportMonth = GetSelectedReportMonth()
 
-        BuildGridView(GridView1, "GridView1", "Headquarter_ID")
+        ' Repopulate the footer count when table is sorted
+        LoadFooterCounts(reportMonth)
+
+        ' Rebuild grid definition (columns, styles, etc.)
+        BuildGridView(GridViewObj, "GridView1", "Headquarter_ID")
+
+        ' Fetch the full dataset for that month
+        Dim eom As String = GetEndOfMonthDate(reportMonth).ToString("yyyy-MM-dd")
+        Dim sqlStr As String = "SELECT * FROM dbo.DMC_Monthly_Subscription_By_Account_Type('" & eom & "') "
         Dim dt As DataTable = GetDataTable(sqlStr)
         Dim dataView As New DataView(dt)
-        Dim sortExpression As String = e.SortExpression
 
-        If ViewState("SortDirection") IsNot Nothing AndAlso ViewState("SortExpression") IsNot Nothing Then
-            Dim previousSortExpression As String = ViewState("SortExpression").ToString()
-            Dim previousSortDirection As String = ViewState("SortDirection").ToString()
+        ' Toggle/view‐state logic for sorting, then apply to DataView
+        Dim defaultFirstExpr As String = GridViewObj.Columns(0).SortExpression
+        Dim fullSortExpr As String = BuildSortExpression(e.SortExpression, defaultFirstExpr)
+        dataView.Sort = fullSortExpr
 
-            If previousSortExpression = sortExpression Then
-                ' If the same column is clicked again, toggle the sort direction
-                If previousSortDirection = "ASC" Then
-                    ViewState("SortDirection") = "DESC"
-                Else
-                    ViewState("SortDirection") = "ASC"
-                End If
-            Else
-                ' If a new column is clicked, default to ascending order
-                ViewState("SortDirection") = "DESC"
-            End If
-        Else
-            ' If ViewState is empty, default to ascending order for the first column
-            ViewState("SortDirection") = "DESC"
-            ViewState("SortExpression") = GridView1.Columns(0).SortExpression
-        End If
-
-        ViewState("SortExpression") = sortExpression
-        Dim sortDirection As String = If(ViewState("SortDirection").ToString() = "ASC", " ASC", " DESC")
-        sortExpression += sortDirection
-
-        dataView.Sort = sortExpression
-
-        GridView1.DataSource = dataView
-        GridView1.DataBind()
+        ' Bind sorted DataView back to the GridView
+        GridViewObj.DataSource = dataView
+        GridViewObj.DataBind()
     End Sub
 
     Protected Sub GridView2_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs) Handles GridView2.RowDataBound
@@ -305,14 +315,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
         Dim ColName() As String = {"Year", "COL", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Yearly Total"}
         Dim ColSize() As Integer = {150, 150, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 200}
         If e.Row.RowType = DataControlRowType.Header Then
-            For i = 0 To e.Row.Cells.Count - 1
-                e.Row.Cells(i).Text = Replace(ColName(i), "_", "")
-                e.Row.Cells(i).VerticalAlign = VerticalAlign.Top
-                e.Row.Cells(i).Width = ColSize(i)
-                If i > 0 Then
-                    e.Row.Cells(i).Style.Add("text-align", "right !important")
-                End If
-            Next
+            ApplySimpleHeaderFormatting(e.Row, ColName, ColSize, rightAlignFromIndex:=1)
             e.Row.Cells(GetColumnIndexByName(e.Row, "COL")).Text = ""  '' remove the column header
 
         ElseIf e.Row.RowType = DataControlRowType.DataRow Then
@@ -329,11 +332,127 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
                     End If
                 End If
             Next
-            e.Row.Cells(GetColumnIndexByName(e.Row, "Year")).Text = IIf(e.Row.Cells(GetColumnIndexByName(e.Row, "COL")).Text <> "Amount", "", e.Row.Cells(GetColumnIndexByName(e.Row, "Year")).Text)
-            e.Row.Cells(GetColumnIndexByName(e.Row, "Total")).Text = IIf(e.Row.Cells(GetColumnIndexByName(e.Row, "COL")).Text <> "Amount", "", e.Row.Cells(GetColumnIndexByName(e.Row, "Total")).Text)
+            '' Hide the year for row that does not display amount
+            If Not String.Equals(e.Row.Cells(GetColumnIndexByName(e.Row, "COL")).Text, "Amount", StringComparison.OrdinalIgnoreCase) Then
+                e.Row.Cells(GetColumnIndexByName(e.Row, "Year")).Text = ""
+                e.Row.Cells(GetColumnIndexByName(e.Row, "Total")).Text = ""
+            End If
         End If
     End Sub
 
+    Protected Sub GridView3_4_5_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs) Handles GridView3.RowDataBound, GridView4.RowDataBound, GridView5.RowDataBound
+        Dim GridViewObj As GridView = CType(sender, GridView)
+        GridViewObj.ShowFooter = False
+
+        ' Set defaults; we’ll override in the Select Case below
+        Dim keyFieldName As String = ""
+        Dim colNames() As String = {}
+        Dim colSizes() As Integer = {}
+        Const rightAlignIndex As Integer = 1
+
+        Select Case GridViewObj.ID
+            Case "GridView3"
+                keyFieldName = "Country"
+                colNames = {"Country", "Stores", "Total", "Average"}
+                colSizes = {150, 100, 100, 100}
+
+            Case "GridView4"
+                keyFieldName = "Customer"
+                colNames = {"Customer", "Stores", "Total", "Average"}
+                colSizes = {150, 100, 100, 100}
+
+            Case "GridView5"
+                keyFieldName = "Segment"
+                colNames = {"Segment", "Stores", "Total", "Average"}
+                colSizes = {150, 100, 100, 100}
+
+            Case Else
+                Return  ' shouldn’t happen, but guard anyway
+        End Select
+
+        If e.Row.RowType = DataControlRowType.Header Then
+            ' Insert sort arrow based on ViewState(“SortExpression”/“SortDirection”)
+            ApplySortArrow(GridViewObj, e.Row, 1)
+
+            ' Then update LinkButton.Text & styling—do NOT overwrite the cell entirely:
+            ApplySimpleHeaderFormatting(e.Row, colNames, colSizes, rightAlignIndex)
+
+        ElseIf e.Row.RowType = DataControlRowType.DataRow Then
+            ' Apply the “Total or not” styling (table-active for Total, right-align others)
+            ApplySimpleDataRowFormatting(e.Row, e.Row.DataItem, keyFieldName, rightAlignIndex)
+
+            ' Highlight the cell in the currently sorted column, but skip the Total row
+            Dim thisCategory As String = DataBinder.Eval(e.Row.DataItem, keyFieldName).ToString()
+            If Not String.Equals(thisCategory, "Total", StringComparison.OrdinalIgnoreCase) Then
+                e.Row.Cells(currentSortedColumnIndex).BackColor = Drawing.ColorTranslator.FromHtml("#ffffe6")
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView3_4_5_Sorting(ByVal sender As Object, ByVal e As GridViewSortEventArgs) Handles GridView3.Sorting, GridView4.Sorting, GridView5.Sorting
+        Dim GridViewObj As GridView = CType(sender, GridView)
+
+        ' Re‐fetch ReportMonth
+        Dim reportMonth As String = GetSelectedReportMonth()
+        Dim eom As String = GetEndOfMonthDate(reportMonth).ToString("yyyy-MM-dd")
+
+        ' Pick the correct SQL string & data‐key name based on which GridView called
+        Dim sqlStr As String = ""
+        Dim dataKeyName As String = ""
+        Select Case GridViewObj.ID
+            Case "GridView3"
+                sqlStr = "SELECT Category AS Country, Stores, Total, Average " &
+                         "FROM DMC_Monthly_Subscription_Statistics('ByCountry','" & eom & "') " &
+                         "ORDER BY CASE Category WHEN 'Total' THEN 1 ELSE 0 END"
+                dataKeyName = "Country"
+
+            Case "GridView4"
+                sqlStr = "SELECT Category AS Customer, Stores, Total, Average " &
+                         "FROM DMC_Monthly_Subscription_Statistics('ByCustomer','" & eom & "') " &
+                         "ORDER BY CASE Category WHEN 'Total' THEN 2 WHEN 'Others' THEN 1 ELSE 0 END"
+                dataKeyName = "Customer"
+
+            Case "GridView5"
+                sqlStr = "SELECT Category AS Segment, Stores, Total, Average " &
+                         "FROM DMC_Monthly_Subscription_Statistics('BySegment','" & eom & "') " &
+                         "ORDER BY CASE Category WHEN 'Total' THEN 1 ELSE 0 END"
+                dataKeyName = "Segment"
+
+            Case Else
+                Return
+        End Select
+
+        ' Re‐build the grid’s columns & styling exactly as in BuildContencPage
+        BuildGridView(GridViewObj, GridViewObj.ID, dataKeyName)   ' use "GridView3"/"GridView4"/"GridView5" for name
+
+        ' Load DataTable
+        Dim dt As DataTable = GetDataTable(sqlStr)
+
+        ' Add an “IsTotal” column to each row: 1 if Category="Total", else 0
+        dt.Columns.Add("IsTotal", GetType(Integer))
+        For Each row As DataRow In dt.Rows
+            If String.Equals(row(dataKeyName).ToString(), "Total", StringComparison.OrdinalIgnoreCase) Then
+                row("IsTotal") = 1
+            Else
+                row("IsTotal") = 0
+            End If
+        Next
+
+        ' Wrap DataView
+        Dim dataView As New DataView(dt)
+
+        ' Toggle the sort expression in ViewState & get full "ColName ASC/DESC"
+        Dim defaultFirstExpr As String = GridViewObj.Columns(0).SortExpression
+        Dim userSortExpr As String = BuildSortExpression(e.SortExpression, defaultFirstExpr)
+
+        ' Prepend “IsTotal ASC” so that non-Total rows (IsTotal=0) come first,
+        ' then apply the user's column sort on the remainder.
+        dataView.Sort = "IsTotal ASC, " & userSortExpr
+
+        ' Bind the sorted DataView back
+        GridViewObj.DataSource = dataView
+        GridViewObj.DataBind()
+    End Sub
 
 
     '' Dropdownlist
@@ -356,9 +475,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
     End Sub
 
     Protected Sub DDL_ReportMonth_SelectedIndexChanged(sender As Object, e As EventArgs) Handles DDL_ReportMonth.SelectedIndexChanged
-        '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
-        ViewState("SortExpression") = String.Empty
-        BuildContenctPage(CDate(GetEndOfMonthDate(DDL_ReportMonth.SelectedValue)).ToString("yyyy-MM-dd"), DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
+        RefreshAllGridViews()   '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
     End Sub
 
     Protected Sub DDL_Country_SelectedIndexChanged(sender As Object, e As EventArgs) Handles DDL_Country.SelectedIndexChanged
@@ -384,19 +501,45 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type
         j = IIf(j < 0, 0, j)
         DDL_Account_Type.SelectedIndex = j
 
-
-        '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
-        ViewState("SortExpression") = String.Empty
-        BuildContenctPage(CDate(GetEndOfMonthDate(DDL_ReportMonth.SelectedValue)).ToString("yyyy-MM-dd"), DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
+        RefreshAllGridViews()   '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
     End Sub
 
     Protected Sub DDL_Account_Type_SelectedIndexChanged(sender As Object, e As EventArgs) Handles DDL_Account_Type.SelectedIndexChanged
-        '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
-        ViewState("SortExpression") = String.Empty
-        BuildContenctPage(CDate(GetEndOfMonthDate(DDL_ReportMonth.SelectedValue)).ToString("yyyy-MM-dd"), DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
+        RefreshAllGridViews()   '' Reset sortExpression whenever the ReportMonth dropdownlist selectedindex is changed
     End Sub
 
 
+    '' Common events
+    Private Sub RefreshAllGridViews()
+        ' Clear the stored sort column/direction
+        ViewState("SortExpression") = String.Empty
+
+        ' Call BuildContencPage with the currently selected dropdown values
+        Dim reportMonth As String = GetEndOfMonthDate(DDL_ReportMonth.SelectedValue).ToString("yyyy-MM-dd")
+        BuildContentPage(reportMonth, DDL_Country.SelectedValue, DDL_Account_Type.SelectedValue)
+    End Sub
+
+    Private Function GetSelectedReportMonth() As String
+        ' DDL_ReportMonth.SelectedValue in EOMONTH string (e.g. "2025-05-31").
+        ' We still CDate→ToString to ensure the correct format.
+        Return CDate(DDL_ReportMonth.SelectedValue).ToString("yyyy-MM-dd")
+    End Function
+
+    Private Sub LoadFooterCounts(reportMonth As String)
+        Dim eom As String = GetEndOfMonthDate(reportMonth).ToString("yyyy-MM-dd")
+        Dim sql As String = "SELECT COUNT(Headquarter_ID) AS Headquarter_Count, " &
+                            "       SUM(Owned_Store)      AS Store_Count,      " &
+                            "       SUM(Total_Amount_Per_Month) AS Total_Amount " &
+                            "FROM dbo.DMC_Monthly_Subscription_By_Account_Type('" & eom & "')"
+
+        Dim dr = RunSQLExecuteReader(sql)
+        If dr.Read() Then
+            HeadquarterCount = String.Format("{0:0}", dr("Headquarter_Count"))
+            StoreCount = String.Format("{0:0}", dr("Store_Count"))
+            TotalAmount = String.Format("{0:#,##0.00}", dr("Total_Amount"))
+        End If
+        dr.Close()
+    End Sub
 
 
 

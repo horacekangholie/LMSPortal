@@ -138,6 +138,7 @@
                             <Columns>
                                 <asp:BoundField DataField="Status" HeaderText="Status" SortExpression="Status" ItemStyle-Width="5%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />
                                 <asp:BoundField DataField="Expiry_Date" HeaderText="Expiry Date" SortExpression="Expiry_Date" ItemStyle-Width="4%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />
+                                <asp:BoundField DataField="Licence_Term" HeaderText="Term" SortExpression="Licence_Term" ItemStyle-Width="4%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />
                                 <asp:BoundField DataField="Licence_Key" HeaderText="Binding Key" SortExpression="Licence_Key" ItemStyle-Width="4%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />
                                 <asp:BoundField DataField="Device_Serial" HeaderText="Device Serial" SortExpression="Device_Serial" ItemStyle-Width="10%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />
                                 <asp:BoundField DataField="Device_ID" HeaderText="Device ID" SortExpression="Device_ID" ItemStyle-Width="15%" ItemStyle-Wrap="false" HeaderStyle-Wrap="false" />

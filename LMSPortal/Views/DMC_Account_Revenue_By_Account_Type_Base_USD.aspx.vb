@@ -6,7 +6,6 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type_Base_USD
 
     Dim PageTitle As String = "DMC Revenue By Account Type (USD)"
     Dim HeadquarterCount, StoreCount, TotalAmount As String
-    Dim currentSortedColumnIndex As Integer
 
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -255,7 +254,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type_Base_USD
 
         If e.Row.RowType = DataControlRowType.Header Then
             ' Use the reusable method to insert the sort arrow and set default column index
-            ApplySortArrow(GridViewObj, e.Row)
+            ApplySortArrow(GridViewObj, e.Row, 4)
 
         ElseIf e.Row.RowType = DataControlRowType.DataRow Then
             ' For each DataRow, right-align columns after index 3
@@ -375,7 +374,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type_Base_USD
 
         If e.Row.RowType = DataControlRowType.Header Then
             ' Insert sort arrow based on ViewState(“SortExpression”/“SortDirection”)
-            ApplySortArrow(GridViewObj, e.Row)
+            ApplySortArrow(GridViewObj, e.Row, 1)
 
             ' Then update LinkButton.Text & styling—do NOT overwrite the cell entirely:
             ApplySimpleHeaderFormatting(e.Row, colNames, colSizes, rightAlignIndex)
@@ -513,126 +512,6 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type_Base_USD
 
 
     '' Common events
-    Private Sub ApplySortArrow(ByVal gv As GridView, ByVal headerRow As GridViewRow)
-        ' Get current sort expression and direction from ViewState
-        Dim sortExpression As String = ViewState("SortExpression")?.ToString()
-        Dim sortDirection As String = ViewState("SortDirection")?.ToString()
-
-        ' If no sortExpression is stored, default to the first column
-        If String.IsNullOrEmpty(sortExpression) Then
-            sortExpression = gv.Columns(0).SortExpression
-            sortDirection = "ASC"
-            currentSortedColumnIndex = 0
-        End If
-
-        ' Find the matching column and insert a <span> with a Label for the sort arrow
-        For Each field As DataControlField In gv.Columns
-            If field.SortExpression = sortExpression Then
-                Dim cellIndex As Integer = gv.Columns.IndexOf(field)
-                Dim sortArrow As New Label() With {
-                    .CssClass = "sort-arrow " & If(sortDirection = "ASC", "asc", "desc")
-                }
-
-                Dim span As New HtmlGenericControl("span")
-                span.Controls.Add(sortArrow)
-                headerRow.Cells(cellIndex).Controls.Add(span)
-
-                currentSortedColumnIndex = cellIndex
-                Exit For
-            End If
-        Next
-
-        ' Apply uniform header styling
-        For i As Integer = 0 To headerRow.Cells.Count - 1
-            headerRow.Cells(i).VerticalAlign = VerticalAlign.Top
-            headerRow.Cells(i).Height = 60
-            If i > 3 Then
-                headerRow.Cells(i).Style.Add("text-align", "right !important")
-            End If
-        Next
-    End Sub
-
-    Private Sub RemoveSortArrowsFromGridView(gv As GridView)
-        If gv.HeaderRow Is Nothing Then Return
-
-        For Each cell As TableCell In gv.HeaderRow.Cells
-            ' Find any HtmlGenericControl with class="sort-arrow"
-            Dim span As HtmlGenericControl = cell.Controls.OfType(Of HtmlGenericControl)().FirstOrDefault(Function(c) c.Attributes("class") = "sort-arrow")
-            If span IsNot Nothing Then
-                cell.Controls.Remove(span)
-            End If
-        Next
-    End Sub
-
-    Private Function BuildSortExpression(newSortExpr As String, defaultFirstExpr As String) As String
-        ' If already have a sort expression stored, toggle or switch direction
-        If ViewState("SortExpression") IsNot Nothing AndAlso ViewState("SortDirection") IsNot Nothing Then
-            Dim prevExpr = ViewState("SortExpression").ToString()
-            Dim prevDir = ViewState("SortDirection").ToString()
-
-            If prevExpr = newSortExpr Then
-                ' Same column clicked → toggle direction
-                ViewState("SortDirection") = If(prevDir = "ASC", "DESC", "ASC")
-            Else
-                ' Different column clicked → default new column to DESC
-                ViewState("SortDirection") = "DESC"
-            End If
-        Else
-            ' First time sorting ever → default the first column to DESC
-            ViewState("SortDirection") = "DESC"
-            ViewState("SortExpression") = defaultFirstExpr
-        End If
-
-        ' Always store new column in ViewState("SortExpression")
-        ViewState("SortExpression") = newSortExpr
-
-        ' Build the final string e.g. "ColumnName DESC" or "ColumnName ASC"
-        Dim dirSuffix = If(ViewState("SortDirection").ToString() = "ASC", " ASC", " DESC")
-        Return newSortExpr & dirSuffix
-    End Function
-
-    Private Sub ApplySimpleHeaderFormatting(headerRow As GridViewRow, colNames() As String, colSizes() As Integer, rightAlignFromIndex As Integer)
-        For i As Integer = 0 To headerRow.Cells.Count - 1
-            Dim cell As TableCell = headerRow.Cells(i)
-
-            ' Attempt to find the LinkButton (ASP.NET renders the header as a LinkButton when AllowSorting=True)
-            Dim linkBtn As LinkButton = cell.Controls.OfType(Of LinkButton)().FirstOrDefault()
-
-            If linkBtn IsNot Nothing Then
-                ' Found the LinkButton; update its Text so it remains clickable.
-                ' This preserves the LinkButton (and any <span> already added by ApplySortArrow).
-                linkBtn.Text = colNames(i)
-            Else
-                ' If for some reason there's no LinkButton (e.g. sorting disabled),
-                ' fall back to setting the cell.Text directly.
-                cell.Text = colNames(i)
-            End If
-
-            ' Now apply the shared styling:
-            cell.VerticalAlign = VerticalAlign.Top
-            cell.Width = colSizes(i)
-
-            If i >= rightAlignFromIndex Then
-                cell.Style.Add("text-align", "right !important")
-            End If
-        Next
-    End Sub
-
-    Private Sub ApplySimpleDataRowFormatting(dataRow As GridViewRow, dataItem As Object, keyFieldName As String, rightAlignFromIndex As Integer)
-        ' Check if the key field equals "Total"
-        Dim valueToCheck As String = DataBinder.Eval(dataItem, keyFieldName).ToString()
-        If String.Equals(valueToCheck, "Total", StringComparison.OrdinalIgnoreCase) Then
-            dataRow.CssClass = "table-active"
-        End If
-
-        ' Right-align cells from the specified index onward
-        For i As Integer = 0 To dataRow.Cells.Count - 1
-            If i >= rightAlignFromIndex Then
-                dataRow.Cells(i).Style.Add("text-align", "right !important")
-            End If
-        Next
-    End Sub
-
     Private Sub RefreshAllGridViews()
         ' Clear the stored sort column/direction
         ViewState("SortExpression") = String.Empty
@@ -644,7 +523,7 @@ Partial Class Views_DMC_Account_Revenue_By_Account_Type_Base_USD
 
     Private Function GetSelectedReportMonth() As String
         ' DDL_ReportMonth.SelectedValue in EOMONTH string (e.g. "2025-05-31").
-        ' We still CDate→ToString to ensure the correct format.
+        ' still CDate→ToString to ensure the correct format.
         Return CDate(DDL_ReportMonth.SelectedValue).ToString("yyyy-MM-dd")
     End Function
 

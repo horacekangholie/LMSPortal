@@ -4,9 +4,7 @@ Partial Class Views_CZL_Devices_List
     Inherits LMSPortalBaseCode
 
     Dim PageTitle As String = "Devices by Country"
-    Dim ExcelColData As String = "Status, Expiry_Date, Licence_Key, Device_Serial, Device_ID, Model, FORMAT(Created_Date, 'dd MMM yy'), AI_Software_Version, R_Version, Scale_SN, Location, MAC_Addr, Production_Licence_No"
-
-    Dim currentSortedColumnIndex As Integer
+    Dim ExcelColData As String = "Status, Expiry_Date, Licence_Term, Licence_Key, Device_Serial, Device_ID, Model, FORMAT(Created_Date, 'dd MMM yy'), AI_Software_Version, R_Version, Scale_SN, Location, MAC_Addr, Production_Licence_No"
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         LB_PageTitle.Text = PageTitle
@@ -114,17 +112,15 @@ Partial Class Views_CZL_Devices_List
             BindDropDownList(DDL_By_Distributor, sqlStr, "Distributor", "Distributor_Code", "Please select")
 
             '' Bind Gridview by country
-            Dim query As String = String.Format("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '{0}' ", Selected_Country)
-            Session("SearchQuery") = query               '' Pass current query to session SearchQuery without the ORDER BY
-            'query += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
-            query += "ORDER BY [Status] "
-            BindGridview(GridView1, query)
+            Dim baseQuery = BuildBaseQuery()
+            'Session("SearchQuery") = baseQuery
+            BindGridview(GridView1, baseQuery & " ORDER BY [Status]")
 
             '' Disable transfer link button when country dropdownlist selection changed
             GridView1.Columns(GridView1.Columns.Count - 1).Visible = IIf(DDL_By_Distributor.SelectedIndex <> 0, True, False)
 
             '' Pass query to download excel button
-            ReportSQL.Text = Replace(query, "*", ExcelColData)
+            ReportSQL.Text = Replace(baseQuery & " ORDER BY [Status]", "*", ExcelColData)
             BT_Download_Excel.Visible = True
         Else
             DDL_By_Distributor.Enabled = False
@@ -153,50 +149,32 @@ Partial Class Views_CZL_Devices_List
             BindDropDownList(DDL_CZL_Client_ID, sqlStr, "Account_Name", "Account_ID", "Please select")
 
             '' Bind Gridview by country and distributor
-            Dim query As String = String.Format("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '{0}' AND Distributor_Code = '{1}' ", Selected_Country, Selected_Distributor)
-            Session("SearchQuery") = query            '' Pass current query to session SearchQuery without the ORDER BY
-            'query += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
-            query += "ORDER BY [Status] "
-            BindGridview(GridView1, query)
+            Dim baseQuery = BuildBaseQuery()
+            'Session("SearchQuery") = baseQuery
+            BindGridview(GridView1, baseQuery & " ORDER BY [Status]")
 
             '' Pass query to download excel button
-            ReportSQL.Text = Replace(query, "*", ExcelColData)
+            ReportSQL.Text = Replace(baseQuery & " ORDER BY [Status]", "*", ExcelColData)
             BT_Download_Excel.Visible = True
         Else
             DDL_CZL_Client_ID.Enabled = False
             DDL_CZL_Client_ID.SelectedIndex = 0
 
             Dim query As String = String.Format("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '{0}' ", Selected_Country)
-            'query += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
             query += "ORDER BY [Status] "
             BindGridview(GridView1, query)
         End If
-
-        TB_Search.Text = String.Empty
     End Sub
 
     Protected Sub DDL_CZL_Client_ID_SelectedIndexChanged(sender As Object, e As EventArgs) Handles DDL_CZL_Client_ID.SelectedIndexChanged
-        Dim Selected_Country As String = DDL_Country.SelectedValue
-        Dim Selected_Distributor As String = DDL_By_Distributor.SelectedValue
-        Dim Selected_Client_ID As String = DDL_CZL_Client_ID.SelectedValue
-        Dim query As String
-
         '' Bind Gridview by country, distributor and client id
-        If Selected_Client_ID <> "0" Then
-            query = String.Format("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '{0}' AND Distributor_Code = '{1}' AND Account_ID = '{2}' ", Selected_Country, Selected_Distributor, Selected_Client_ID)
-        Else
-            query = String.Format("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '{0}' AND Distributor_Code = '{1}' ", Selected_Country, Selected_Distributor)
-        End If
-        Session("SearchQuery") = query        '' Pass current query to session SearchQuery
-        'query += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
-        query += "ORDER BY [Status] "
-        BindGridview(GridView1, query)
+        Dim baseQuery = BuildBaseQuery()
+        Session("SearchQuery") = baseQuery
+        BindGridview(GridView1, baseQuery & " ORDER BY [Status]")
 
         '' Pass query to download excel button
-        ReportSQL.Text = Replace(query, "*", ExcelColData)
+        ReportSQL.Text = Replace(baseQuery & " ORDER BY [Status]", "*", ExcelColData)
         BT_Download_Excel.Visible = True
-
-        TB_Search.Text = String.Empty
     End Sub
 
 
@@ -204,27 +182,31 @@ Partial Class Views_CZL_Devices_List
     '' Gridview controls
     Protected Sub GridView1_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles GridView1.PageIndexChanging
         GridView1.PageIndex = e.NewPageIndex
-        Dim Selected_Country As String = DDL_Country.SelectedValue
-        Dim Selected_Distributor As String = DDL_By_Distributor.SelectedValue
-        Dim Selected_Client_ID As String = DDL_CZL_Client_ID.SelectedValue
 
-        Dim query As String = "SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '" & Selected_Country & "' "
-        If Selected_Distributor <> "0" Then
-            query += "AND Distributor_Code = '" & Selected_Distributor & "' "
-        End If
-        If Selected_Client_ID <> "0" Then
-            query += "AND Account_ID = '" & Selected_Client_ID & "' "
-        End If
+        Dim baseQuery = BuildBaseQuery()
+        Dim sortExpr As String = If(ViewState("SortExpression") IsNot Nothing,
+                                ViewState("SortExpression").ToString(),
+                                GridView1.Columns(0).SortExpression)
+        Dim sortDir As String = If(ViewState("SortDirection")?.ToString() = "ASC", "ASC", "DESC")
+        Dim fullSort As String = sortExpr & " " & sortDir
+        BindGridview(GridView1, baseQuery & " ORDER BY " & fullSort, fullSort)
 
-        Session("SearchQuery") = query         '' Pass current query to session SearchQuery
-        'query += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
-        query += "ORDER BY [Status] "
-        BindGridview(GridView1, query)
+        ReportSQL.Text = Replace(baseQuery & " ORDER BY " & fullSort, "*", ExcelColData)
+        BT_Download_Excel.Visible = True
     End Sub
 
     Protected Sub GridView1_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles GridView1.RowDataBound
+        Dim gv As GridView = DirectCast(sender, GridView)
+
         If e.Row.RowType = DataControlRowType.Header Then
-            CustomizeSortedHeaderRow(DirectCast(sender, GridView), e.Row)
+            ApplySortArrow(gv, e.Row, rightAlignFromIndex:=14)
+            Dim colNames = {
+                "Status", "Expiry Date", "Term", "Binding Key", "Device Serial",
+                "Device ID", "Model", "Created On", "AI Soft. Ver.", "R Vers",
+                "Scale SN", "Location", "MAC Address", "Prod. Licence No", ""
+            }
+            Dim colSizes = {5, 4, 4, 4, 10, 15, 4, 4, 4, 4, 5, 25, 10, 10, 15}
+            ApplySimpleHeaderFormatting(e.Row, colNames, colSizes, rightAlignFromIndex:=14)
 
         ElseIf e.Row.RowType = DataControlRowType.DataRow Then
             Dim drv As System.Data.DataRowView = e.Row.DataItem
@@ -258,9 +240,7 @@ Partial Class Views_CZL_Devices_List
             End If
 
             '' Change the color for sorted column
-            For i = 0 To e.Row.Cells.Count - 1
-                e.Row.Cells(currentSortedColumnIndex).Style.Add("background-color", "#ffffe6")
-            Next
+            e.Row.Cells(currentSortedColumnIndex).BackColor = Drawing.ColorTranslator.FromHtml("#ffffe6")
         End If
     End Sub
 
@@ -273,76 +253,49 @@ Partial Class Views_CZL_Devices_List
     End Sub
 
     Protected Sub GridView1_Sorting(sender As Object, e As GridViewSortEventArgs) Handles GridView1.Sorting
-        Dim sortExpression As String = e.SortExpression
-        If ViewState("SortDirection") IsNot Nothing AndAlso ViewState("SortExpression") IsNot Nothing Then
-            Dim previousSortExpression As String = ViewState("SortExpression").ToString()
-            Dim previousSortDirection As String = ViewState("SortDirection").ToString()
+        ' Toggle ASC/DESC on the new column
+        Dim defaultExpr = GridView1.Columns(0).SortExpression
+        Dim fullExpr = BuildSortExpression(e.SortExpression, defaultExpr)
 
-            ViewState("SortDirection") = If(previousSortExpression = sortExpression, If(previousSortDirection = "ASC", "DESC", "ASC"), "DESC")
-        Else
-            ViewState("SortDirection") = "DESC"
-            ViewState("SortExpression") = GridView1.Columns(0).SortExpression
-        End If
+        Dim baseQuery = BuildBaseQuery()
+        Dim sortedQuery = baseQuery & " ORDER BY " & fullExpr
 
-        ViewState("SortExpression") = sortExpression
-        Dim sortDirection As String = If(ViewState("SortDirection").ToString() = "ASC", " ASC", " DESC")
-        sortExpression += sortDirection
+        ' Bind the grid (and pass the sort expression so the DataView highlights correctly)
+        BindGridview(GridView1, sortedQuery, fullExpr)
 
-        '' populate gridview
-        Dim keyword As String = EscapeChar(TB_Search.Text)
-        Dim Selected_Country As String = DDL_Country.SelectedValue
-        Dim Selected_Distributor As String = DDL_By_Distributor.SelectedValue
-        Dim Selected_Client_ID As String = DDL_CZL_Client_ID.SelectedValue
-
-        Dim query As String = "SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device WHERE Country = '" & Selected_Country & "' "
-        If Selected_Distributor <> "0" Then
-            query += "AND Distributor_Code = '" & Selected_Distributor & "' "
-        End If
-        If Selected_Client_ID <> "0" Then
-            query += "AND Account_ID = '" & Selected_Client_ID & "' "
-        End If
-
-        '' Form the query and bind gridview
-        Session("SearchQuery") = query         '' Pass current query to session SearchQuery
-        query += "AND (Device_Serial LIKE '%" & keyword & "%' OR Device_ID LIKE '%" & keyword & "%' OR Scale_SN LIKE '%" & keyword & "%' OR Location LIKE '%" & keyword & "%') "
-        BindGridview(GridView1, query, sortExpression)
-
-        '' Form the query for excel download
-        query += "ORDER BY " & sortExpression
-        ReportSQL.Text = Replace(query, "*", ExcelColData)
+        ' Update your Excel‐export query
+        ReportSQL.Text = Replace(sortedQuery, "*", ExcelColData)
         BT_Download_Excel.Visible = True
     End Sub
 
-    Private Sub CustomizeSortedHeaderRow(ByVal gridView As GridView, ByVal headerRow As GridViewRow)
-        Dim sortExpression As String = ViewState("SortExpression")?.ToString()
-        Dim sortDirection As String = ViewState("SortDirection")?.ToString()
 
-        ' If sortExpression is empty, set it to the first column's SortExpression
-        If String.IsNullOrEmpty(sortExpression) Then
-            sortExpression = gridView.Columns(0).SortExpression
-            sortDirection = "ASC"
-            currentSortedColumnIndex = 0
+    '' Common function
+    Private Function BuildBaseQuery() As String
+        Dim sb As New Text.StringBuilder()
+        sb.Append("SELECT * FROM R_CZL_Licenced_Device_With_Unassigned_Device ")
+        sb.Append("WHERE Country = '").Append(DDL_Country.SelectedValue).Append("' ")
+
+        If DDL_By_Distributor.SelectedValue <> "0" Then
+            sb.Append("AND Distributor_Code = '").Append(DDL_By_Distributor.SelectedValue).Append("' ")
         End If
 
-        ' Loop through the headerrow control field to find which is the current selected column
-        For Each field As DataControlField In gridView.Columns
-            If field.SortExpression = sortExpression Then
-                Dim cellIndex As Integer = gridView.Columns.IndexOf(field)
-                Dim sortArrow As New Label()
-                sortArrow.CssClass = "sort-arrow " & If(sortDirection = "ASC", "asc", "desc")
+        If DDL_CZL_Client_ID.SelectedValue <> "0" Then
+            sb.Append("AND Account_ID = '").Append(DDL_CZL_Client_ID.SelectedValue).Append("' ")
+        End If
 
-                ' Add the sorting arrow inside a <span> element
-                Dim span As New HtmlGenericControl("span")
-                span.Controls.Add(sortArrow)
+        Dim kw As String = TB_Search.Text.Trim()
+        If kw <> "" Then
+            kw = EscapeChar(kw)
+            ' Add column name to filter
+            sb.Append("AND (Device_Serial LIKE '%").Append(kw) _
+              .Append("%' OR Device_ID LIKE '%").Append(kw) _
+              .Append("%' OR Licence_Key LIKE '%").Append(kw) _
+              .Append("%' OR Scale_SN LIKE '%").Append(kw) _
+              .Append("%' OR Location LIKE '%").Append(kw).Append("%') ")
+        End If
 
-                ' Append the <span> to the header cell
-                headerRow.Cells(cellIndex).Controls.Add(span)
-
-                ' Get current sorted column index
-                currentSortedColumnIndex = cellIndex
-            End If
-        Next
-    End Sub
+        Return sb.ToString()
+    End Function
 
 
 
@@ -460,15 +413,12 @@ Partial Class Views_CZL_Devices_List
 
     '' Search record
     Protected Sub BT_Search_Click(ByVal sender As Object, ByVal e As EventArgs) Handles BT_Search.Click
-        Dim keyword As String = EscapeChar(TB_Search.Text)
-        Dim SearchQuery As String = Session("SearchQuery")
-        SearchQuery += "AND (Licence_Key LIKE '%" & keyword & "%' OR Device_Serial LIKE '%" & keyword & "%' OR Device_ID LIKE '%" & keyword & "%' OR Scale_SN LIKE '%" & keyword & "%' OR Location LIKE '%" & keyword & "%') "
-        'SearchQuery += "ORDER BY CAST(Activated_Date AS date), Expiry_Date "
-        SearchQuery += "ORDER BY [Status] "
-        BindGridview(GridView1, SearchQuery)
+        Dim baseQuery = BuildBaseQuery()
+        'Session("SearchQuery") = baseQuery
+        BindGridview(GridView1, baseQuery & " ORDER BY [Status]")
 
         '' Pass query to download excel button and replace * with specified column name for excel
-        ReportSQL.Text = Replace(SearchQuery, "*", ExcelColData)
+        ReportSQL.Text = Replace(baseQuery & " ORDER BY [Status]", "*", ExcelColData)
         BT_Download_Excel.Visible = True
     End Sub
 
