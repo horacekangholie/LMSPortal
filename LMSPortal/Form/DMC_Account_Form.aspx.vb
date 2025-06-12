@@ -1,6 +1,4 @@
 ﻿
-Imports System.Data
-
 Partial Class Form_DMC_Account_Form
     Inherits LMSPortalBaseCode
 
@@ -1437,30 +1435,6 @@ Partial Class Form_DMC_Account_Form
     End Sub
 
 
-    '' Data View for In-memory subcription store update
-    Private Property SubscriptionItems As DataTable
-        Get
-            If ViewState("SubscriptionItems") Is Nothing Then
-                Dim dt As New DataTable()
-                dt.Columns.Add("Headquarter_ID", GetType(String))
-                dt.Columns.Add("Store_ID", GetType(String))
-                dt.Columns.Add("Store_No", GetType(String))
-                dt.Columns.Add("Duration", GetType(String))
-                dt.Columns.Add("Currency", GetType(String))
-                dt.Columns.Add("Fee", GetType(Decimal))
-                dt.Columns.Add("Payment_Method", GetType(String))
-                dt.Columns.Add("Payment_Mode", GetType(String))
-                dt.Columns.Add("Subscriber_Group", GetType(String))
-
-                ViewState("SubscriptionItems") = dt
-            End If
-
-            Return CType(ViewState("SubscriptionItems"), DataTable)
-        End Get
-        Set(value As DataTable)
-            ViewState("SubscriptionItems") = value
-        End Set
-    End Property
 
 
 
